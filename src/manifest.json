@@ -1,0 +1,34 @@
+{
+  "author": "JayGao",
+  "name": "funds",
+  "description": "chrome extension",
+  "version": "0.1.0",
+  "manifest_version": 2,
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "homepage_url": "https://github.com/bestGao/theWorldOfJayGao#readme",
+  "browser_action": {
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "funds chrome exten",
+    "default_popup": "popup/popup.html"
+  },
+  "options_page": "options/options.html",
+  "options_ui": {
+    "page": "options/options.html",
+    "chrome_style": true
+  },
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "permissions": ["storage", "http://fundgz.1234567.com.cn/js/*", "https://push2.eastmoney.com/api/*"]
+}
