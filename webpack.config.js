@@ -21,7 +21,7 @@ const config = {
     filename: '[name].js',
   },
   resolve: {
-    extensions: ['.js', '.vue'],
+    extensions: ['.js', '.vue']
   },
   module: {
     rules: [{
@@ -50,7 +50,7 @@ const config = {
       loader: 'file-loader',
       options: {
         name: '[name].[ext]',
-        outputPath: '/images/',
+        outputPath: 'assets',
         emitFile: false,
       },
     },
@@ -74,8 +74,8 @@ const config = {
       filename: '[name].css',
     }),
     new CopyPlugin([{
-      from: 'icons',
-      to: 'icons',
+      from: 'assets',
+      to: 'assets',
       ignore: ['icon.xcf']
     },
     {

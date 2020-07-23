@@ -1,8 +1,11 @@
 <template>
   <div id="app" class="container" :class="containerWidth">
     <div>
-      <div class="tab-row">
-        <div v-for="el in seciData" class="tab-col" :key="el.f12">
+      <div class="tab-row" :key="index" v-for="(rowItem, index) of seciData">
+        <div v-for="el in rowItem" class="tab-col" :key="el.f12">
+          <div class="close-icon-wrapper" @click="closeItem(el)">
+            <img class="close-icon" src="/assets/images/icon_close.png" alt="关闭" />
+          </div>
           <h5>{{ el.f14 }}</h5>
           <p :class="el.f3 >= 0 ? 'up' : 'down'">{{ el.f2 }}</p>
           <p :class="el.f3 >= 0 ? 'up' : 'down'">{{ el.f4 }}&nbsp;&nbsp;{{ el.f3 }}%</p>
@@ -93,10 +96,12 @@
 </template>
 
 <script>
-
+import { arrayChunk } from '../util'
 export default {
   data () {
     return {
+      isShowTip: false,
+      searchIds: ['1.000001', '1.000300', '0.399001', '0.399006', '0.399005', '100.HSI', '100.SPX', '100.NDX'],
       isEdit: false,
       fundcode: "",
       isAdd: false,
@@ -173,23 +178,40 @@ export default {
     }
   },
   methods: {
+    closeItem (item) {
+      const result = window.confirm('确定不再展示该指数?')
+      if (!result) {
+        return false
+      }
+      const id = item.f12
+      let sd = []
+      let sd1 = []
+      this.seciData.forEach(function (sItem) {
+        if (id.includes(sItem.f12) === false) {
+          sd.push(sItem)
+        }
+      })
+      this.searchIds.forEach(function (sItem) {
+        if (id.includes(sItem.f12) === false) {
+          sd1.push(sItem)
+        }
+      })
+      this.seciData = sd
+      this.searchIds = sd1
+    },
     option () {
       chrome.tabs.create({ url: "/options/options.html" });
-    },
-    reward () {
-      this.rewardShadow = true;
-      this.$refs.reward.init();
     },
     closeReward () {
       this.rewardShadow = false;
     },
     getSeciData () {
-      // 获取指数 f1-f18 该指数参数 1.000001 是上证指数
+      // f1-f18: 指数参数 1.000001 是上证指数代号
       let url =
-        "https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&fields=f2,f3,f4,f12,f14&secids=1.000001,1.000300,0.399001,0.399006,0.399005,100.HSI,100.SPX,100.NDX&_=" +
+        `https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&fields=f2,f3,f4,f12,f14&secids=${this.searchIds.join(',')}&_=` +
         new Date().getTime();
       this.$axios.get(url).then(res => {
-        this.seciData = res.data.data.diff;
+        this.seciData = arrayChunk(res.data.data.diff, 4);
       });
     },
     getData () {
@@ -368,7 +390,7 @@ export default {
 
 <style lang="scss" scoped>
 .container {
-  min-width: 400px;
+  min-width: 500px;
   min-height: 150px;
   overflow-y: auto;
   padding: 8px 2px;
@@ -383,7 +405,7 @@ export default {
 }
 
 .more-width {
-  width: 620px;
+  width: 700px;
 }
 
 .num-all-width {
@@ -471,10 +493,25 @@ tbody tr:hover {
   margin-top: 10px;
 }
 
-.tab-col {
-  float: left;
-  width: 25%;
-  text-align: center;
+.tab-row {
+  padding: 6px 0;
+  display: flex;
+  .tab-col {
+    background-color: #fff2f2;
+    margin: 0 6px;
+    border-radius: 15px;
+    padding: 10px;
+    position: relative;
+    .close-icon-wrapper {
+      .close-icon {
+        width: 16px;
+        height: 16px;
+      }
+      position: absolute;
+      right: 10px;
+      top: 0;
+    }
+  }
 }
 
 .tab-col h5 {
@@ -494,10 +531,6 @@ tbody tr:hover {
 
 .tab-row:after {
   clear: both;
-}
-
-.tab-row {
-  padding: 6px 0;
 }
 
 .primary {
