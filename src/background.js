@@ -4,7 +4,7 @@ let Interval;
 
 var isDuringDate = () => {
 
-  //时区转换为东8区
+  // 时区转换为东8区
   var zoneOffset = 8;
   var offset8 = new Date().getTimezoneOffset() * 60 * 1000;
   var nowDate8 = new Date().getTime();

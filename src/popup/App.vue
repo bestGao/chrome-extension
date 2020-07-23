@@ -29,8 +29,8 @@
               <th v-if="isEdit">基金代码</th>
               <th v-if="!isEdit">估算净值</th>
               <th>涨跌幅</th>
-              <th v-if="showAmount">持有金额（元）</th>
-              <th v-if="showGains">估算收益</th>
+              <th>持有金额（元）</th>
+              <th>估算收益</th>
               <th v-if="!isEdit">更新时间</th>
               <th v-if="isEdit && (showAmount || showGains)">持有份额</th>
               <th v-if="isEdit">排序</th>
@@ -44,8 +44,8 @@
               <td v-if="isEdit">{{ el.fundcode }}</td>
               <td v-if="!isEdit">{{ el.gsz }}</td>
               <td :class="el.gszzl >= 0 ? 'up' : 'down'">{{ el.gszzl }}%</td>
-              <td v-if="showAmount">{{ calculateMoney(el) }}</td>
-              <td v-if="showGains" :class="el.gszzl >= 0 ? 'up' : 'down'">{{ calculate(el) }}</td>
+              <td>{{ calculateMoney(el) }}</td>
+              <td :class="el.gszzl >= 0 ? 'up' : 'down'">{{ calculate(el) }}</td>
               <td v-if="!isEdit">{{ el.gztime.substr(5) }}</td>
               <th v-if="isEdit && isEdit && (showAmount || showGains)">
                 <input
@@ -105,28 +105,26 @@ import { arrayChunk } from '../util'
 export default {
   data () {
     return {
-      searchIds: ['1.000001', '1.000300', '0.399001', '0.399006', '0.399005', '100.HSI', '100.SPX', '100.NDX'], // 大盘指数id
+      searchIds: [], // 大盘指数id
       isEdit: false, // 是否编辑
       fundcode: 0, // 输入基金的代码
-      marketIndexes: [], // 大盘指数数组
+      marketIndexes: [], // 切片的大盘指数数组
       isLiveUpdate: true, // 是否实时更新 ajax轮询
       isDuringDate: false,
       RealtimeFundcode: null,
       selectedFunds: [], // 已添加的基金详情列表
       intervalId1: null,
       intervalId2: null,
-      showGains: false, // 是否显示估算收益
-      showAmount: false,
       fundList: [],
       fundListM: [],
-      allGains: 0,
+      allGains: 0, // 估算收益
       originalMarketIndexes: []
     };
   },
   mounted () {
     this.getmarketIndexes();
     chrome.storage.sync.get(
-      ["RealtimeFundcode", "fundListM", "showAmount", "showGains", "fundList"],
+      ["searchIds","RealtimeFundcode", "fundListM", "showAmount", "showGains", "fundList"],
       res => {
         this.fundList = res.fundList ? res.fundList : this.fundList;
         if (res.fundListM) {
@@ -140,9 +138,8 @@ export default {
             this.fundListM.push(val);
           }
         }
-        this.showAmount = res.showAmount ? res.showAmount : false;
-        this.showGains = res.showGains ? res.showGains : false;
         this.RealtimeFundcode = res.RealtimeFundcode;
+        this.searchIds = res?.searchIds || ['1.000001', '1.000300', '0.399001', '0.399006', '0.399005', '100.HSI', '100.SPX', '100.NDX'],
         this.getData();
       }
     );
@@ -201,9 +198,11 @@ export default {
       this.originalMarketIndexes = sd;
       this.marketIndexes = arrayChunk(sd, 4);
       this.searchIds = sd1
+      chrome.storage.sync.set({'searchIds': sd1})
     },
     option () {
-      chrome.tabs.create({ url: "/options/options.html" });
+      window.open('/options/options.html')
+      // chrome.tabs.create({ url: "/options/options.html" });
     },
     getmarketIndexes () {
       // f1-f18: 指数参数 1.000001 是上证指数代号

@@ -4,9 +4,6 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const ExtensionReloader = require('webpack-extension-reloader');
 const { VueLoaderPlugin } = require('vue-loader');
-const {
-  version
-} = require('./package.json');
 
 const config = {
   mode: 'development', // 不压缩dist代码
@@ -90,17 +87,7 @@ const config = {
     },
     {
       from: 'manifest.json',
-      to: 'manifest.json',
-      transform: (content) => {
-        const jsonContent = JSON.parse(content);
-        jsonContent.version = version;
-
-        if (config.mode === 'development') {
-          jsonContent['content_security_policy'] = "script-src 'self' 'unsafe-eval'; object-src 'self'";
-        }
-
-        return JSON.stringify(jsonContent, null, 2);
-      },
+      to: 'manifest.json'
     },
     ]),
   ],
