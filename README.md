@@ -12,9 +12,11 @@
 > chrome扩展是基于HTML、CSS、JavaScript构建的作用于自定义chrome浏览器体验的程序
 
 ### 如何开发一个自己的chrome extension
-打开chrome://extensions 加载已解压的扩展程序
-在弹出页面右键/检查 或在 extension icon上右键 审查弹出内容
 
+#### 调试
+打开chrome://extensions 加载已解压的扩展程序
+打开开发者模式
+点击扩展程序在弹出页面右键/检查 或在 扩展程序icon上右键 审查弹出内容
 
 [Vue2.x](https://cn.vuejs.org/v2/guide/instance.html) + [Webpack4.x](https://v4.webpack.js.org/concepts/plugins/)
 
