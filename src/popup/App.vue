@@ -1,96 +1,101 @@
 <template>
-  <div id="app" class="container" :class="containerWidth">
+  <div id="app" class="container" :class="customClass">
     <div>
-      <div class="tab-row" :key="index" v-for="(rowItem, index) of seciData">
-        <div v-for="el in rowItem" class="tab-col" :key="el.f12">
+      <div class="tab-row" :key="index" v-for="(rowItem, index) of marketIndexes">
+        <div
+          v-for="el in rowItem"
+          class="tab-col"
+          :key="el.f12"
+          :class="el.f4 >= 0 ? 'up' : 'down'"
+        >
           <div class="close-icon-wrapper" @click="closeItem(el)">
-            <img class="close-icon" src="/assets/images/icon_close.png" alt="关闭" />
+            <img class="close-icon" src="/assets/images/icon_close.png" alt="不再显示" title="不看这条指数" />
           </div>
-          <h5>{{ el.f14 }}</h5>
-          <p :class="el.f3 >= 0 ? 'up' : 'down'">{{ el.f2 }}</p>
-          <p :class="el.f3 >= 0 ? 'up' : 'down'">{{ el.f4 }}&nbsp;&nbsp;{{ el.f3 }}%</p>
+          <p title="大盘指数名">{{ el.f14 }}</p>
+          <p
+            :class="el.f4 >= 0 ? 'up' : 'down'"
+            title="最新价"
+            :style="{'font-size': '20px'}"
+          >{{ el.f2 }}</p>
+          <p :class="el.f4 >= 0 ? 'up' : 'down'">涨跌额：{{ el.f4 }}</p>
+          <p :class="el.f4 >= 0 ? 'up' : 'down'">涨跌幅：{{ el.f3 }}%</p>
         </div>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>基金名称</th>
-            <th v-if="isEdit">基金代码</th>
-            <th v-if="!isEdit">估算净值</th>
-            <th>涨跌幅</th>
-            <th v-if="showAmount">持有额</th>
-            <th v-if="showGains">估算收益</th>
-            <th v-if="!isEdit">更新时间</th>
-            <th v-if="isEdit && (showAmount || showGains)">持有份额</th>
-            <th v-if="isEdit">排序</th>
-            <th v-if="isEdit">特别关注</th>
-            <th v-if="isEdit">删除</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(el, index) in dataList" :key="el.fundcode">
-            <td class="fundName" :title="el.name">{{ el.name }}</td>
-            <td v-if="isEdit">{{ el.fundcode }}</td>
-            <td v-if="!isEdit">{{ el.gsz }}</td>
-            <td :class="el.gszzl >= 0 ? 'up' : 'down'">{{ el.gszzl }}%</td>
-            <td v-if="showAmount">{{ calculateMoney(el) }}</td>
-            <td v-if="showGains" :class="el.gszzl >= 0 ? 'up' : 'down'">{{ calculate(el) }}</td>
-            <td v-if="!isEdit">{{ el.gztime.substr(5) }}</td>
-            <th v-if="isEdit && isEdit && (showAmount || showGains)">
-              <input
-                class="btn num"
-                placeholder="输入持有份额"
-                v-model="el.num"
-                @input="changeNum(el, index)"
-                type="text"
-              />
-            </th>
-            <td v-if="isEdit">
-              <input @click="sortUp(index)" class="btn edit" value="▲" type="button" />
-            </td>
-            <td v-if="isEdit">
-              <input
-                @click="slt(el.fundcode)"
-                :class="el.fundcode == RealtimeFundcode ? 'slt' : ''"
-                class="btn edit"
-                value="✔"
-                type="button"
-              />
-            </td>
-            <td v-if="isEdit">
-              <input @click="dlt(el.fundcode)" class="btn red edit" value="✖" type="button" />
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <template v-if="selectedFunds.length">
+        <table>
+          <thead>
+            <tr>
+              <th>基金名称</th>
+              <th v-if="isEdit">基金代码</th>
+              <th v-if="!isEdit">估算净值</th>
+              <th>涨跌幅</th>
+              <th v-if="showAmount">持有金额（元）</th>
+              <th v-if="showGains">估算收益</th>
+              <th v-if="!isEdit">更新时间</th>
+              <th v-if="isEdit && (showAmount || showGains)">持有份额</th>
+              <th v-if="isEdit">排序</th>
+              <th v-if="isEdit" title="收藏一个基金，后台脚本自动更新估值和涨跌幅，并在扩展图标中以徽标的形式显示。">特别关注</th>
+              <th v-if="isEdit">删除</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(el, index) in selectedFunds" :key="el.fundcode">
+              <td class="fundName" :title="el.name">{{ el.name }}</td>
+              <td v-if="isEdit">{{ el.fundcode }}</td>
+              <td v-if="!isEdit">{{ el.gsz }}</td>
+              <td :class="el.gszzl >= 0 ? 'up' : 'down'">{{ el.gszzl }}%</td>
+              <td v-if="showAmount">{{ calculateMoney(el) }}</td>
+              <td v-if="showGains" :class="el.gszzl >= 0 ? 'up' : 'down'">{{ calculate(el) }}</td>
+              <td v-if="!isEdit">{{ el.gztime.substr(5) }}</td>
+              <th v-if="isEdit && isEdit && (showAmount || showGains)">
+                <input
+                  class="btn num"
+                  placeholder="输入持有份额"
+                  v-model="el.num"
+                  @input="changeNum(el, index)"
+                  type="text"
+                />
+              </th>
+              <td v-if="isEdit">
+                <button title="上移" @click="sortUp(index)" class="btn edit">👆</button>
+              </td>
+              <td v-if="isEdit">
+                <button
+                  @click="slt(el.fundcode)"
+                  :class="el.fundcode == RealtimeFundcode ? 'slt' : ''"
+                  class="btn edit"
+                  title="设为徽标"
+                >💗</button>
+              </td>
+              <td v-if="isEdit">
+                <button title="取消自选" @click="dlt(el.fundcode)" class="btn red edit">❌</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </template>
+      <template v-else>
+        <div :style="{'text-align':'center', 'padding': '10px'}">请添加想要关注的基金</div>
+      </template>
     </div>
-    <p v-if="isEdit" class="tips">特别关注功能介绍：可以指定一个基金，实现后台自动更新估值涨跌幅，并在程序图标中以角标的形式实时更新。</p>
     <div v-if="isEdit" class="input-row">
       <span>添加新基金:</span>
-      <input v-model="fundcode" class="btn" type="text" placeholder="请输入基金代码" />
-      <input @click="save" class="btn" type="button" value="确定" />
+      <input v-model="fundcode" class="btn" type="number" placeholder="请输入基金代码" />
+      <button @click="save" class="btn">确定</button>
     </div>
     <div class="input-row">
-      <input
+      <button
         class="btn"
-        v-if="isDuringDate"
-        type="button"
-        :value="isLiveUpdate ? '暂停实时更新' : '实时更新'"
-        @click="isLiveUpdate = !isLiveUpdate"
-      />
-      <input class="btn" v-if="!isDuringDate" type="button" value="休市中" />
-      <input class="btn" type="button" :value="isEdit ? '完成编辑' : '编辑'" @click="isEdit = !isEdit" />
+        @click="isDuringDate ? isLiveUpdate = !isLiveUpdate : null"
+      >{{isDuringDate ? (isLiveUpdate ? '暂停实时更新' : '实时更新') : '休市中'}}</button>
+      <button class="btn" @click="isEdit = !isEdit">{{isEdit ? '保存' : '编辑'}}</button>
       <button class="btn" @click="option">设置</button>
-      <input
+      <div
+        :style="{display: 'inline-block', 'font-size':'16px'}"
         v-if="showGains"
-        class="btn"
-        :class="allGains >= 0 ? 'btn-up' : 'btn-down'"
-        type="button"
-        :title="
-          allGains >= 0 ? '加仓' : '∑(っ°Д°;)っ 大事不好啦'
-        "
-        :value="'总收益：' + allGains"
-      />
+        :class="allGains >= 0 ? 'good-color' : 'bad-color'"
+        :title="allGains >= 0 ? '果然我的眼光是最好哒' : '小跌怡情，顶的住！！跌是为了更好的涨！！'"
+      >估算收益：{{allGains}}</div>
     </div>
   </div>
 </template>
@@ -100,30 +105,26 @@ import { arrayChunk } from '../util'
 export default {
   data () {
     return {
-      isShowTip: false,
-      searchIds: ['1.000001', '1.000300', '0.399001', '0.399006', '0.399005', '100.HSI', '100.SPX', '100.NDX'],
-      isEdit: false,
-      fundcode: "",
-      isAdd: false,
-      seciData: [],
-      isLiveUpdate: false,
+      searchIds: ['1.000001', '1.000300', '0.399001', '0.399006', '0.399005', '100.HSI', '100.SPX', '100.NDX'], // 大盘指数id
+      isEdit: false, // 是否编辑
+      fundcode: 0, // 输入基金的代码
+      marketIndexes: [], // 大盘指数数组
+      isLiveUpdate: true, // 是否实时更新 ajax轮询
       isDuringDate: false,
       RealtimeFundcode: null,
-      dataList: [],
-      myVar: null,
-      myVar1: null,
-      rewardShadow: false,
-      checked: "wepay",
-      showGains: false,
+      selectedFunds: [], // 已添加的基金详情列表
+      intervalId1: null,
+      intervalId2: null,
+      showGains: false, // 是否显示估算收益
       showAmount: false,
-      fundList: ["001618"],
+      fundList: [],
       fundListM: [],
-      allGains: 0
+      allGains: 0,
+      originalMarketIndexes: []
     };
   },
   mounted () {
-    this.isLiveUpdate = true;
-    this.getSeciData();
+    this.getmarketIndexes();
     chrome.storage.sync.get(
       ["RealtimeFundcode", "fundListM", "showAmount", "showGains", "fundList"],
       res => {
@@ -145,9 +146,10 @@ export default {
         this.getData();
       }
     );
+    document.body.bgColor = '#fafff8'
   },
   computed: {
-    containerWidth () {
+    customClass () {
       if (this.rewardShadow) {
         return "more-height";
       } else if (this.isEdit) {
@@ -164,15 +166,15 @@ export default {
       chrome.runtime.sendMessage({ type: "DuringDate" }, response => {
         this.isDuringDate = response.farewell;
         if (val && this.isDuringDate) {
-          this.myVar = setInterval(() => {
-            this.getSeciData();
+          this.intervalId1 = setInterval(() => {
+            this.getmarketIndexes();
           }, 5 * 1000);
-          this.myVar1 = setInterval(() => {
+          this.intervalId2 = setInterval(() => {
             this.getData();
           }, 60 * 1000);
         } else {
-          clearInterval(this.myVar);
-          clearInterval(this.myVar1);
+          clearInterval(this.intervalId1);
+          clearInterval(this.intervalId2);
         }
       });
     }
@@ -186,32 +188,31 @@ export default {
       const id = item.f12
       let sd = []
       let sd1 = []
-      this.seciData.forEach(function (sItem) {
+      this.originalMarketIndexes.forEach(function (sItem) {
         if (id.includes(sItem.f12) === false) {
           sd.push(sItem)
         }
       })
       this.searchIds.forEach(function (sItem) {
-        if (id.includes(sItem.f12) === false) {
+        if (sItem.includes(id) === false) {
           sd1.push(sItem)
         }
       })
-      this.seciData = sd
+      this.originalMarketIndexes = sd;
+      this.marketIndexes = arrayChunk(sd, 4);
       this.searchIds = sd1
     },
     option () {
       chrome.tabs.create({ url: "/options/options.html" });
     },
-    closeReward () {
-      this.rewardShadow = false;
-    },
-    getSeciData () {
+    getmarketIndexes () {
       // f1-f18: 指数参数 1.000001 是上证指数代号
       let url =
         `https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&fields=f2,f3,f4,f12,f14&secids=${this.searchIds.join(',')}&_=` +
         new Date().getTime();
       this.$axios.get(url).then(res => {
-        this.seciData = arrayChunk(res.data.data.diff, 4);
+        this.originalMarketIndexes = res.data.data.diff
+        this.marketIndexes = arrayChunk(res.data.data.diff, 4);
       });
     },
     getData () {
@@ -238,7 +239,7 @@ export default {
         .all(axiosArray)
         .then(
           this.$axios.spread((...responses) => {
-            this.dataList = [];
+            this.selectedFunds = [];
             responses.forEach(res => {
               let val = res.data.match(/\{(.+?)\}/);
               let data = JSON.parse(val[0]);
@@ -248,7 +249,7 @@ export default {
                 );
                 data.num = slt[0].num;
               }
-              this.dataList.push(data);
+              this.selectedFunds.push(data);
               if (data.fundcode == this.RealtimeFundcode) {
                 chrome.runtime.sendMessage({
                   type: "refreshBadge",
@@ -265,7 +266,7 @@ export default {
     },
     getAllGains () {
       let allGains = 0;
-      this.dataList.forEach(val => {
+      this.selectedFunds.forEach(val => {
         allGains += parseFloat(this.calculate(val));
       });
       this.allGains = allGains.toFixed(1);
@@ -336,9 +337,9 @@ export default {
       if (ind == 0) {
         return false;
       }
-      let val = this.dataList[ind - 1];
-      this.$set(this.dataList, ind - 1, this.dataList[ind]);
-      this.$set(this.dataList, ind, val);
+      let val = this.selectedFunds[ind - 1];
+      this.$set(this.selectedFunds, ind - 1, this.selectedFunds[ind]);
+      this.$set(this.selectedFunds, ind, val);
       this.fundListM[ind] = [
         this.fundListM[ind - 1],
         (this.fundListM[ind - 1] = this.fundListM[ind])
@@ -472,12 +473,12 @@ tbody tr:hover {
   width: 80px;
 }
 
-.btn-up {
+.good-color {
   color: #f56c6c;
   border-color: #f56c6c;
 }
 
-.btn-down {
+.bad-color {
   color: #4eb61b;
   border-color: #4eb61b;
 }
@@ -497,10 +498,10 @@ tbody tr:hover {
   padding: 6px 0;
   display: flex;
   .tab-col {
-    background-color: #fff2f2;
-    margin: 0 6px;
-    border-radius: 15px;
-    padding: 10px;
+    margin: 0 2px;
+    border-radius: 10px;
+    padding: 12px;
+    flex: 1;
     position: relative;
     .close-icon-wrapper {
       .close-icon {
@@ -508,8 +509,14 @@ tbody tr:hover {
         height: 16px;
       }
       position: absolute;
-      right: 10px;
-      top: 0;
+      right: 0px;
+      top: -8px;
+    }
+    &.down {
+      background-color: #dcdcdc;
+    }
+    &.up {
+      background-color: #ffefef;
     }
   }
 }
