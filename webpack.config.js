@@ -6,12 +6,12 @@ const ExtensionReloader = require('webpack-extension-reloader');
 const { VueLoaderPlugin } = require('vue-loader');
 
 const config = {
-  mode: 'development', // 不压缩dist代码
+  mode: 'production',
   context: __dirname + '/src',
   entry: {
     'background': './background.js',
-    'popup/popup': './popup/popup.js',
-    'options/options': './options/options.js',
+    'main': './popup/popup.js',
+    'option': './options/options.js',
   },
   output: {
     path: __dirname + '/dist',
@@ -70,6 +70,9 @@ const config = {
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),
+    new ExtensionReloader({
+      manifest: path.resolve(__dirname, "manifest.json")
+    }),
     new CopyPlugin([{
       from: 'assets',
       to: 'assets',
@@ -92,14 +95,6 @@ const config = {
     ]),
   ],
 };
-
-if (process.env.HMR === 'true') {
-  config.plugins = (config.plugins || []).concat([
-    new ExtensionReloader({
-      manifest: __dirname + '/src/manifest.json',
-    }),
-  ]);
-}
 
 function transformHtml (content) {
   return ejs.render(content.toString());

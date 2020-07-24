@@ -17,6 +17,9 @@
 
 [Vue2.x](https://cn.vuejs.org/v2/guide/instance.html) + [Webpack4.x](https://v4.webpack.js.org/concepts/plugins/)
 
+(本地代码保存后reload扩展)[https://www.nodenpm.com/webpack-extension-reloader/package.html]
+> This plugin doesn't allow Hot Module Replacement (HMR) yet 该扩展打开时不能更新代码，需要重新加载
+
 当然完全可以直接用 HTML CSS JavaScript
 
 首先，该扩展项目的根目录必须包含一个[manifest.json](https://developer.chrome.com/extensions/manifest)用来配置该扩展程序，chrome 识别该 json 文件
@@ -61,3 +64,6 @@ yarn run watch 监听文件修改并编译
 - 天天基金网/大盘指数：[获取指数接口示例](https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&secids=1.000001,0.399001&invt=2&fields=f2,f3,f4,f6,f12,f14,f104,f105,f106&ut=267f9ad526dbe6b0262ab19316f5a25b&cb=jQuery183027144151760481683_1595495878685&_=1595495878944)
 
 - 天天基金网/基金详情：[基金数据接口示例](http://fundgz.1234567.com.cn/js/519674.js?rt=1595495344238)
+
+还可以做什么
+怎么打通支付宝的基金页面实现在扩展程序的popup.html买卖基金？
