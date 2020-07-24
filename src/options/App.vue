@@ -1,94 +1,18 @@
 <template>
   <div id="app" class="container">
     <div>
-      <ul class="setting-list">
-        <li>
-          <div class="list-title">
-            显示份额与收益信息
-            <!-- <div class="select-row">
-              显示持有金额
-              <input type="radio" id="numFalse" :value="false" v-model="showAmount" />
-              <label for="numFalse">否</label>
-              <input type="radio" id="numTrue" :value="true" v-model="showAmount" />
-              <label for="numTrue">是</label>
-            </div>
-            <div class="select-row">
-              显示估值收益
-              <input type="radio" id="numFalse" :value="false" v-model="showGains" />
-              <label for="numFalse">否</label>
-              <input type="radio" id="numTrue" :value="true" v-model="showGains" />
-              <label for="numTrue">是</label>
-            </div>-->
-            <button @click="handleReset" title="重置后您的自定义选项都将失效了">重置</button>
-          </div>
-          <p>tips：在编辑设置里，输入基金的持有份额，即可计算出收益估值情况。</p>
-        </li>
-      </ul>
+      <button @click="handleReset" title="重置后您的自定义选项都将失效了">重置</button>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  data() {
-    return {
-      disabled: false,
-      showAmount: false,
-      showGains: false,
-    };
-  },
-  mounted() {
-    chrome.storage.sync.get(["showNum", "showAmount", "showGains"], (res) => {
-      if (res.showNum) {
-        chrome.storage.sync.set({
-          showNum: false,
-        });
-        chrome.storage.sync.set(
-          {
-            showAmount: true,
-          },
-          () => {
-            this.showAmount = true;
-          }
-        );
-        chrome.storage.sync.set(
-          {
-            showGains: true,
-          },
-          () => {
-            this.showGains = true;
-          }
-        );
-      } else {
-        this.showAmount = res.showAmount ? res.showAmount : false;
-        this.showGains = res.showGains ? res.showGains : false;
-      }
-    });
-  },
-  watch: {
-    showAmount(val) {
-      chrome.storage.sync.set(
-        {
-          showAmount: val,
-        },
-        () => {
-          this.showAmount = val;
-        }
-      );
-    },
-    showGains(val) {
-      chrome.storage.sync.set(
-        {
-          showGains: val,
-        },
-        () => {
-          this.showGains = val;
-        }
-      );
-    },
+  data () {
+    return {};
   },
   methods: {
-    handleReset() {
+    handleReset () {
       const result = window.confirm(
         "您的自定义设置将失效，包括显示的大盘指数，确定要重置吗?"
       );
@@ -108,10 +32,10 @@ export default {
             "100.NDX",
           ],
         },
-        function () {}
+        function () { }
       );
     },
-    openGithub() {
+    openGithub () {
       window.open("https://github.com/bestGao/funds-chrome-extension");
     },
   },

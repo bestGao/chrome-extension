@@ -19,14 +19,31 @@
 
 当然完全可以直接用 HTML CSS JavaScript
 
-首先，该扩展项目的根目录必须包含一个[manifest.json](https://developer.chrome.com/extensions/manifest)用来配置该扩展程序，chrome识别该json文件
+首先，该扩展项目的根目录必须包含一个[manifest.json](https://developer.chrome.com/extensions/manifest)用来配置该扩展程序，chrome 识别该 json 文件
 
-使用web worker 实现ajax 轮询
+使用 web worker 实现 ajax 轮询
 
-Chrome浏览器扩展通过chrome.storage.* API，可以存取数据或监听数据的变化
-chrome.storage.sync方式实现了自动数据同步，相同的chrome用户无论使用什么物理设备，只要以相同的账户登录即可访问存储的数据。设备离线时数据存储在本地，一旦设备上线则同步数据。如果用户禁止了数据同步，则采用chrome.storage.local方式
+websocket
 
-在manifest.json文件中的[permissions字段](https://developer.chrome.com/extensions/declare_permissions)注册'storage'后可以在项目中使用[chrome.storage](https://developer.chrome.com/extensions/storage)
+同源策略
+从上面的测试可以看出，WebSocket协议本身不要求同源策略（Same-origin Policy），也就是某个地址为http://a.com的网页可以通过WebSocket连接到ws://b.com。但是，浏览器会发送Origin的HTTP头给服务器，服务器可以根据Origin拒绝这个WebSocket请求。所以，是否要求同源要看服务器端如何检查
+
+扩展常常用一个单独的长时间运行的脚本来管理一些任务或者状态
+
+[background.js](https://developer.chrome.com/extensions/background_pages) 长时间在后台运行 用于实时更新特别关注的基金数据
+
+如同 architecture overview 的解释。背景页是一个运行在扩展进程中的 HTML 页面。它在你的扩展的整个生命周期都存在，同时，在同一时间只有一个实例处于活动状态。
+
+在一个有背景页的典型扩展中，用户界面（比如，浏览器行为或者页面行为和任何选项页）是由沉默视图实现的。当视图需要一些状态，它从背景页获取该状态。当背景页发现了状态改变，它会通知视图进行更新。
+
+清单
+请在扩展清单中注册背景页。一般，背景页不需要任何 HTML，仅仅需要 js 文件，比如：
+
+Chrome 浏览器扩展通过 chrome.storage.\* API，可以存取数据或监听数据的变化
+chrome.storage.sync 方式实现了自动数据同步，相同的 chrome 用户无论使用什么物理设备，只要以相同的账户登录即可访问存储的数据。设备离线时数据存储在本地，一旦设备上线则同步数据。
+如果用户禁止了数据同步或者没有登录chrome账户，则采用 chrome.storage.local 方式
+
+在 manifest.json 文件中的[permissions 字段](https://developer.chrome.com/extensions/declare_permissions)注册'storage'后可以在项目中使用[chrome.storage](https://developer.chrome.com/extensions/storage)
 
 ### 调试
 

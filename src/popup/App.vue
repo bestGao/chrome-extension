@@ -22,6 +22,10 @@
         </div>
       </div>
       <template v-if="selectedFunds.length">
+        <div
+          :style="{'text-align': 'center', 'margin-top': '10px', 'font-size': '16px', 'color': 'pink'}"
+          v-if="selectedFunds.length"
+        >{{isDuringDate ? '基金数据实时更新中' : '休市中'}}</div>
         <table>
           <thead>
             <tr>
@@ -32,7 +36,7 @@
               <th>持有金额（元）</th>
               <th>估算收益</th>
               <th v-if="!isEdit">更新时间</th>
-              <th v-if="isEdit && (showAmount || showGains)">持有份额</th>
+              <th v-if="isEdit">持有份额</th>
               <th v-if="isEdit">排序</th>
               <th v-if="isEdit" title="收藏一个基金，后台脚本自动更新估值和涨跌幅，并在扩展图标中以徽标的形式显示。">特别关注</th>
               <th v-if="isEdit">删除</th>
@@ -47,7 +51,7 @@
               <td>{{ calculateMoney(el) }}</td>
               <td :class="el.gszzl >= 0 ? 'up' : 'down'">{{ calculate(el) }}</td>
               <td v-if="!isEdit">{{ el.gztime.substr(5) }}</td>
-              <th v-if="isEdit && isEdit && (showAmount || showGains)">
+              <th v-if="isEdit && isEdit">
                 <input
                   class="btn num"
                   placeholder="输入持有份额"
@@ -84,15 +88,11 @@
       <button @click="save" class="btn">确定</button>
     </div>
     <div class="input-row">
-      <button
-        class="btn"
-        @click="isDuringDate ? isLiveUpdate = !isLiveUpdate : null"
-      >{{isDuringDate ? (isLiveUpdate ? '暂停实时更新' : '实时更新') : '休市中'}}</button>
-      <button class="btn" @click="isEdit = !isEdit">{{isEdit ? '保存' : '编辑'}}</button>
-      <button class="btn" @click="option">设置</button>
+      <button class="btn" @click="isEdit = !isEdit; fundcode = ''">{{isEdit ? '保存' : '编辑'}}</button>
+      <button class="btn" @click="option">自定义扩展</button>
       <div
         :style="{display: 'inline-block', 'font-size':'16px'}"
-        v-if="showGains"
+        v-if="selectedFunds.length"
         :class="allGains >= 0 ? 'good-color' : 'bad-color'"
         :title="allGains >= 0 ? '果然我的眼光是最好哒' : '小跌怡情，顶的住！！跌是为了更好的涨！！'"
       >估算收益：{{allGains}}</div>
@@ -107,8 +107,8 @@ export default {
     return {
       searchIds: [], // 大盘指数id
       isEdit: false, // 是否编辑
-      fundcode: 0, // 输入基金的代码
-      marketIndexes: [], // 切片的大盘指数数组
+      fundcode: '', // 输入基金的代码
+      marketIndexes: [], // 大盘指数数组切片
       isLiveUpdate: true, // 是否实时更新 ajax轮询
       isDuringDate: false,
       RealtimeFundcode: null,
@@ -122,9 +122,9 @@ export default {
     };
   },
   mounted () {
-    this.getmarketIndexes();
+    const ws = new WebSocket('ws://10.50.214.64:9898')
     chrome.storage.sync.get(
-      ["searchIds","RealtimeFundcode", "fundListM", "showAmount", "showGains", "fundList"],
+      ["RealtimeFundcode", "fundListM", "fundList", "searchIds"],
       res => {
         this.fundList = res.fundList ? res.fundList : this.fundList;
         if (res.fundListM) {
@@ -139,11 +139,21 @@ export default {
           }
         }
         this.RealtimeFundcode = res.RealtimeFundcode;
-        this.searchIds = res?.searchIds || ['1.000001', '1.000300', '0.399001', '0.399006', '0.399005', '100.HSI', '100.SPX', '100.NDX'],
+        this.searchIds = res.searchIds;
         this.getData();
+        this.getmarketIndexes()
+        this.startUpdateData()
       }
     );
     document.body.bgColor = '#fafff8'
+
+    ws.addEventListener('open', function (event) {
+      console.log('websocket连上了！', event)
+      ws.send([1,2,3])
+    })
+    ws.addEventListener('message', function (event) {
+      console.log('服务器传来的数据', event.data)
+    })
   },
   computed: {
     customClass () {
@@ -151,18 +161,14 @@ export default {
         return "more-height";
       } else if (this.isEdit) {
         return "more-width";
-      } else if (this.showAmount && this.showGains) {
-        return "num-all-width";
-      } else if (this.showAmount || this.showGains) {
-        return "num-one-width";
       }
     }
   },
-  watch: {
-    isLiveUpdate (val) {
+  methods: {
+    startUpdateData () {
       chrome.runtime.sendMessage({ type: "DuringDate" }, response => {
         this.isDuringDate = response.farewell;
-        if (val && this.isDuringDate) {
+        if (this.isDuringDate && this.searchIds) {
           this.intervalId1 = setInterval(() => {
             this.getmarketIndexes();
           }, 5 * 1000);
@@ -174,9 +180,7 @@ export default {
           clearInterval(this.intervalId2);
         }
       });
-    }
-  },
-  methods: {
+    },
     closeItem (item) {
       const result = window.confirm('确定不再展示该指数?')
       if (!result) {
@@ -198,13 +202,17 @@ export default {
       this.originalMarketIndexes = sd;
       this.marketIndexes = arrayChunk(sd, 4);
       this.searchIds = sd1
-      chrome.storage.sync.set({'searchIds': sd1})
+      chrome.storage.sync.set({ 'searchIds': sd1 })
     },
     option () {
       window.open('/options/options.html')
       // chrome.tabs.create({ url: "/options/options.html" });
     },
     getmarketIndexes () {
+      // console.log('getmarketIndexes', this.searchIds)
+      if (!this.searchIds) {
+        return false
+      }
       // f1-f18: 指数参数 1.000001 是上证指数代号
       let url =
         `https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&fields=f2,f3,f4,f12,f14&secids=${this.searchIds.join(',')}&_=` +
@@ -222,7 +230,7 @@ export default {
       // 	  ["gsz"]=>"1.2388"                //估算净值
       // 	  ["gszzl"]=>"-0.42"               //估算涨跌百分比 即-0.42%
       // 	  ["gztime"]=>"2018-09-25 15:00"   //估值时间
-
+      // console.log('getData', this.searchIds)
       let axiosArray = [];
       for (const fund of this.fundListM) {
         let url =
@@ -242,12 +250,12 @@ export default {
             responses.forEach(res => {
               let val = res.data.match(/\{(.+?)\}/);
               let data = JSON.parse(val[0]);
-              if (this.showAmount || this.showGains) {
-                let slt = this.fundListM.filter(
-                  item => item.code == data.fundcode
-                );
-                data.num = slt[0].num;
-              }
+
+              let slt = this.fundListM.filter(
+                item => item.code == data.fundcode
+              );
+              data.num = slt[0].num;
+
               this.selectedFunds.push(data);
               if (data.fundcode == this.RealtimeFundcode) {
                 chrome.runtime.sendMessage({
@@ -337,6 +345,7 @@ export default {
         return false;
       }
       let val = this.selectedFunds[ind - 1];
+      // vue实例创建后给selectedFunds对象添加新的属性
       this.$set(this.selectedFunds, ind - 1, this.selectedFunds[ind]);
       this.$set(this.selectedFunds, ind, val);
       this.fundListM[ind] = [
@@ -410,10 +419,6 @@ export default {
 
 .num-all-width {
   min-width: 520px;
-}
-
-.num-one-width {
-  min-width: 440px;
 }
 
 table {

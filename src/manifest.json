@@ -13,12 +13,12 @@
   "homepage_url": "https://github.com/bestGao/theWorldOfJayGao#readme",
   "browser_action": {
     "default_icon": {
-      "16": "assets/icons/icon16.png",
+      "19": "assets/icons/icon19.png",
       "32": "assets/icons/icon32.png",
       "48": "assets/icons/icon48.png",
       "128": "assets/icons/icon128.png"
     },
-    "default_title": "funds chrome exten",
+    "default_title": "实时更新基金数据",
     "default_popup": "popup/popup.html"
   },
   "options_page": "options/options.html",

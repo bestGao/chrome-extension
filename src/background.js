@@ -29,7 +29,8 @@ var isDuringDate = () => {
   }
 };
 
-var setBadge = (fundcode, Realtime) => {
+// 设置特别关注的基金数据
+var setBadge = (fundcode) => {
   let url =
     "http://fundgz.1234567.com.cn/js/" +
     fundcode +
@@ -43,11 +44,7 @@ var setBadge = (fundcode, Realtime) => {
       chrome.browserAction.setBadgeText({
         text: ress.gszzl
       });
-      let color = Realtime ?
-        ress.gszzl >= 0 ?
-          "#F56C6C" :
-          "#4eb61b" :
-        "#4285f4";
+      let color = ress.gszzl >= 0 ? "#F56C6C" : "#4eb61b";
       chrome.browserAction.setBadgeBackgroundColor({
         color: color
       });
@@ -94,6 +91,7 @@ chrome.storage.sync.get(["RealtimeFundcode"], res => {
   RealtimeFundcode = res.RealtimeFundcode ? res.RealtimeFundcode : null;
   runStart(RealtimeFundcode);
 });
+// 监听来自content script脚本的请求
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type == "DuringDate") {
     let DuringDate = isDuringDate();
