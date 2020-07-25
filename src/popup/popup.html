@@ -1,15 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>mine optional funds</title>
+  <% if (usews === 'true') { %>
+  <link rel="stylesheet" href="./popupdev.css">
+  <% }else{ %>
   <link rel="stylesheet" href="./popup.css">
+  <%}%>
 
 </head>
 <body>
   <div id="app">
 
   </div>
+  <% if (usews === 'true') { %>
+  <script src="./popupdev.js"></script>
+  <% }else{ %>
   <script src="./popup.js"></script>
+  <%}%>
+
 </body>
 </html>

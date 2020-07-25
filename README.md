@@ -1,20 +1,24 @@
-大家好，很高兴做第一次组内分享，我先来抛砖引。
-这次分享的是一个可爱的小工具，比较不起眼，小小的身体却蕴藏着很大的能力。
-我们手把手来做一个chrome扩展
+> 大家好，很高兴给老表们开启这次组内分享，算是第一个做分享的咯，所以我先来抛砖引玉，期待后续有小伙伴带来更多精彩有趣可爱的分享。
 
+> 这次分享的是一个特别可爱的小工具 — chrome extension，我们可以在[chrome商店](https://chrome.google.com/webstore/category/extensions)下载一个体验下。虽然它比较不起眼，被提及的频率不高，也不算什么高科技，但是小小的身体却蕴藏着大大的能力 - 自定义您的浏览器。
+
+### 什么是 chrome extensions
+
+> chrome 扩展是基于web技术 （如：HTML、CSS、JavaScript) 构建的可包含多个组件和功能的单一目的的小型软件；它具体能做什么：
+-  修改当前浏览的web内容，例如 整页翻译
+- 自定义浏览器启动页、主页、主题/背景色
+- 通过开放的chrome API控制浏览器的交互
+- so on ...
+
+我们每天都要使用的浏览器既然有这么高的可定制化，那我们亲自动手来开发一个chrome扩展叭
+
+### 开发
 首先chrome扩展区别于chrome插件
 实时查看已关注的基金动态。
 
 包括实时估值情况，可以增减自选基金。
 
 首先输入基金代码添加基金，将基金添加特别关注后，可以以角标的形式展示在浏览器中。可以在设置中单独开启显示份额与收益选项，在编辑中输入持有的份额，可以计算出每个基金的实时估值与收益，以及总收益。
-
-### 什么是 chrome extensions
-
-> chrome 扩展是基于 HTML、CSS、JavaScript 构建的作用于自定义 chrome 浏览器体验的程序
-
-### 如何开发一个自己的 chrome extension
-
 [Vue2.x](https://cn.vuejs.org/v2/guide/instance.html) + [Webpack4.x](https://v4.webpack.js.org/concepts/plugins/)
 
 (本地代码保存后reload扩展)[https://www.nodenpm.com/webpack-extension-reloader/package.html]
@@ -25,7 +29,7 @@
 首先，该扩展项目的根目录必须包含一个[manifest.json](https://developer.chrome.com/extensions/manifest)用来配置该扩展程序，chrome 识别该 json 文件
 
 使用 web worker 实现 ajax 轮询
-
+build 和build:dev最大的区别就是build:dev 把ajax轮询放到了node.js服务器，让服务器判断数据是否变化通过websocket向客户端推送大盘指数数据
 websocket
 
 同源策略

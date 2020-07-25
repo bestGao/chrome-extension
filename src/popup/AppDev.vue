@@ -1,17 +1,18 @@
 <template>
   <div id="app" class="container" :class="customClass">
     <div>
-      <div class="tab-row" :key="index" v-for="(rowItem, index) of marketIndexes">
+      <div
+        v-if="showTip"
+        :style="{'text-align': 'center', 'color': '#c0c0c0', 'font-size': '12px'}"
+      >实时数据来自服务器 {{serveraddress}} 的推送</div>
+      <div class="tab-row">
         <div
-          v-for="el in rowItem"
+          v-for="el in marketIndexes"
           class="tab-col"
           :key="el.f12"
           :class="el.f4 >= 0 ? 'up' : 'down'"
         >
-          <div class="close-icon-wrapper" @click="closeItem(el)">
-            <img class="close-icon" src="/assets/images/icon_close.png" alt="不再显示" title="不看这条指数" />
-          </div>
-          <p title="大盘指数名">{{ el.f14 }}</p>
+          <p title="大盘指数名称">{{ el.f14 }}</p>
           <p
             :class="el.f4 >= 0 ? 'up' : 'down'"
             title="最新价"
@@ -34,10 +35,10 @@
               <th v-if="!isEdit">估算净值</th>
               <th>涨跌幅</th>
               <th>持有金额（元）</th>
-              <th>估算收益（元）</th>
+              <th>估算收益</th>
               <th v-if="!isEdit">更新时间</th>
               <th v-if="isEdit">持有份额</th>
-              <th v-if="isEdit">排序</th>
+              <th v-if="isEdit && selectedFunds.length > 1">排序</th>
               <th v-if="isEdit" title="收藏一个基金，后台脚本自动更新估值和涨跌幅，并在扩展图标中以徽标的形式显示。">特别关注</th>
               <th v-if="isEdit">删除</th>
             </tr>
@@ -60,13 +61,13 @@
                   type="text"
                 />
               </th>
-              <td v-if="isEdit">
+              <td v-if="isEdit && selectedFunds.length > 1">
                 <button title="上移" @click="sortUp(index)" class="btn edit">👆</button>
               </td>
               <td v-if="isEdit">
                 <button
                   @click="slt(el.fundcode)"
-                  :class="el.fundcode == RealtimeFundcode ? 'slt' : ''"
+                  :class="el.fundcode == attentionFundcode ? 'slt' : ''"
                   class="btn edit"
                   title="设为徽标"
                 >💗</button>
@@ -89,139 +90,105 @@
     </div>
     <div class="input-row">
       <button class="btn" @click="isEdit = !isEdit; fundcode = ''">{{isEdit ? '保存' : '编辑'}}</button>
-      <button class="btn" @click="option">设置</button>
       <div
         :style="{display: 'inline-block', 'font-size':'16px'}"
         v-if="selectedFunds.length"
         :class="allGains >= 0 ? 'good-color' : 'bad-color'"
         :title="allGains >= 0 ? '果然我的眼光是最好哒' : '小跌怡情，顶的住！！跌是为了更好的涨！！'"
-      >估算收益（元）：{{allGains}}</div>
+      >估算收益：{{allGains}}</div>
     </div>
   </div>
 </template>
 
 <script>
-import { arrayChunk } from '../util'
 export default {
-  data () {
+  name: "vueApp",
+  data() {
     return {
-      searchIds: [], // 大盘指数id
+      showTip: false,
+      serveraddress: "192.168.0.101:9898", // 10.50.214.64
       isEdit: false, // 是否编辑
-      fundcode: '', // 输入基金的代码
-      marketIndexes: [], // 大盘指数数组切片
-      isLiveUpdate: true, // 是否实时更新 ajax轮询
+      fundcode: "", // 输入基金的代码
+      marketIndexes: [], // 大盘指数数组
       isDuringDate: false,
-      RealtimeFundcode: null,
-      selectedFunds: [], // 已添加的基金详情列表
+      attentionFundcode: "", // 特别关注的基金代码
+      selectedFunds: [], // 已自选的基金s数组
       intervalId1: null,
       intervalId2: null,
       fundList: [],
       fundListM: [],
       allGains: 0, // 估算收益
-      originalMarketIndexes: []
     };
   },
-  mounted () {
+  mounted() {
+    alert(1)
+    const _that = this;
     chrome.storage.sync.get(
-      ["RealtimeFundcode", "fundListM", "fundList", "searchIds"],
-      res => {
-        this.fundList = res.fundList ? res.fundList : this.fundList;
+      ["attentionFundcode", "fundListM", "fundList"],
+      (res) => {
+        debugger;
+        _that.fundList = res.fundList ? res.fundList : _that.fundList;
         if (res.fundListM) {
-          this.fundListM = res.fundListM;
+          _that.fundListM = res.fundListM;
         } else {
-          for (const fund of this.fundList) {
+          for (const fund of _that.fundList) {
             let val = {
               code: fund,
-              num: null
+              num: null,
             };
-            this.fundListM.push(val);
+            _that.fundListM.push(val);
           }
         }
-        this.RealtimeFundcode = res.RealtimeFundcode;
-        this.searchIds = res.searchIds;
-        this.getData();
-        this.getmarketIndexes()
-        this.startUpdateData()
+        if (res.attentionFundcode) {
+          _that.attentionFundcode = res.attentionFundcode;
+        }
+        _that.getData();
+        _that.getmarketIndexes();
       }
     );
-    document.body.bgColor = '#fafff8'
+    document.body.bgColor = "#fafff8";
+
+    const ws = new WebSocket(`ws://${this.serveraddress}`);
+    debugger
+    ws.addEventListener("open", function (event) {
+      _that.showTip = true;
+      ws.send("jayGao");
+    });
+    ws.addEventListener("message", function (event) {
+      console.log("服务器传来的数据", event.data);
+      _that.marketIndexes = JSON.parse(event.data);
+    });
+    ws.onerror = function () {
+      alert("websocket服务器连接失败");
+      return false;
+    };
+    ws.onclose = function () {
+      // 关闭 websocket
+      alert("服务器连接已关闭...");
+    };
   },
   computed: {
-    customClass () {
-      if (this.rewardShadow) {
-        return "more-height";
-      } else if (this.isEdit) {
+    customClass() {
+      if (this.isEdit) {
         return "more-width";
       }
-    }
+    },
   },
   methods: {
-    startUpdateData () {
-      chrome.runtime.sendMessage({ type: "DuringDate" }, response => {
-        this.isDuringDate = response.farewell;
-        if (this.isDuringDate && this.searchIds) {
-          this.intervalId1 = setInterval(() => {
-            this.getmarketIndexes();
-          }, 5 * 1000);
-          this.intervalId2 = setInterval(() => {
-            this.getData();
-          }, 60 * 1000);
-        } else {
-          clearInterval(this.intervalId1);
-          clearInterval(this.intervalId2);
-        }
-      });
+    option() {
+      chrome.tabs.create({ url: "/options/options.html" });
     },
-    closeItem (item) {
-      const result = window.confirm('确定不再展示该指数?')
-      if (!result) {
-        return false
-      }
-      const id = item.f12
-      let sd = []
-      let sd1 = []
-      this.originalMarketIndexes.forEach(function (sItem) {
-        if (id.includes(sItem.f12) === false) {
-          sd.push(sItem)
-        }
-      })
-      this.searchIds.forEach(function (sItem) {
-        if (sItem.includes(id) === false) {
-          sd1.push(sItem)
-        }
-      })
-      this.originalMarketIndexes = sd;
-      this.marketIndexes = arrayChunk(sd, 3);
-      this.searchIds = sd1
-      chrome.storage.sync.set({ 'searchIds': sd1 })
-    },
-    option () {
-      window.open('/options/options.html')
-      // chrome.tabs.create({ url: "/options/options.html" });
-    },
-    getmarketIndexes () {
-      // console.log('getmarketIndexes', this.searchIds)
-      if (!this.searchIds) {
-        return false
-      }
+    getmarketIndexes() {
       // f1-f18: 指数参数 1.000001 是上证指数代号
       let url =
-        `https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&fields=f2,f3,f4,f12,f14&secids=${this.searchIds.join(',')}&_=` +
+        `https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&fields=f2,f3,f4,f12,f14&secids=1.000001,0.399006,100.HSI&_=` +
         new Date().getTime();
-      this.$axios.get(url).then(res => {
-        this.originalMarketIndexes = res.data.data.diff
-        this.marketIndexes = arrayChunk(res.data.data.diff, 3);
+      this.$axios.get(url).then((res) => {
+        this.marketIndexes = res.data.data.diff;
       });
     },
-    getData () {
-      // 	  ["fundcode"]=>"519983"           //基金代码
-      // 	  ["name"]=>"长信量化先锋混合A"    //基金名称
-      // 	  ["jzrq"]=>"2018-09-21"           //净值日期
-      // 	  ["dwjz"]=>"1.2440"               //当日净值
-      // 	  ["gsz"]=>"1.2388"                //估算净值
-      // 	  ["gszzl"]=>"-0.42"               //估算涨跌百分比 即-0.42%
-      // 	  ["gztime"]=>"2018-09-25 15:00"   //估值时间
-      // console.log('getData', this.searchIds)
+    getData() {
+      /* 	  fundcode 基金代码 name 基金名称 jzrq 净值日期 dwjz 当日净值 gsz 估算净值 gszzl 估算涨跌百分比 gztime 估值时间 */
       let axiosArray = [];
       for (const fund of this.fundListM) {
         let url =
@@ -238,62 +205,60 @@ export default {
         .then(
           this.$axios.spread((...responses) => {
             this.selectedFunds = [];
-            responses.forEach(res => {
+            responses.forEach((res) => {
               let val = res.data.match(/\{(.+?)\}/);
               let data = JSON.parse(val[0]);
-
               let slt = this.fundListM.filter(
-                item => item.code == data.fundcode
+                (item) => item.code == data.fundcode
               );
               data.num = slt[0].num;
-
               this.selectedFunds.push(data);
-              if (data.fundcode == this.RealtimeFundcode) {
+              if (data.fundcode == this.attentionFundcode) {
                 chrome.runtime.sendMessage({
                   type: "refreshBadge",
-                  data: data
+                  data: data,
                 });
               }
             });
             this.getAllGains();
           })
         )
-        .catch(error => {
+        .catch((error) => {
           console.log("数据请求出现错误！");
         });
     },
-    getAllGains () {
+    getAllGains() {
       let allGains = 0;
-      this.selectedFunds.forEach(val => {
+      this.selectedFunds.forEach((val) => {
         allGains += parseFloat(this.calculate(val));
       });
-      this.allGains = allGains.toFixed(1);
+      this.allGains = Number(allGains.toString().match(/^\d+(?:\.\d{0,2})?/));
     },
-    changeNum (item, ind) {
+    changeNum(item, ind) {
       for (let fund of this.fundListM) {
         if (fund.code == item.fundcode) {
           fund.num = item.num;
         }
       }
       chrome.storage.sync.set({
-        fundListM: this.fundListM
+        fundListM: this.fundListM,
       });
       this.getAllGains();
     },
-    calculateMoney (val) {
-      let sum = (val.dwjz * val.num).toFixed(1);
+    calculateMoney(val) {
+      let sum = val.dwjz * val.num;
+      sum = Number(sum.toString().match(/^\d+(?:\.\d{0,2})?/));
       return sum;
     },
-    calculate (val) {
-      let sum = ((val.gsz - val.dwjz) * val.num).toFixed(1);
+    calculate(val) {
+      let sum = (val.gsz - val.dwjz) * val.num;
+      sum = Number(sum.toString().match(/^\d+(?:\.\d{0,2})?/));
       return sum;
     },
-    save () {
-      //验证
+    save() {
       let hasCode = this.fundListM.some((currentValue, index, array) => {
         return currentValue.code == this.fundcode;
       });
-
       if (hasCode) {
         alert("该基金已添加！");
         return false;
@@ -307,31 +272,31 @@ export default {
         new Date().getTime();
       this.$axios
         .get(url)
-        .then(res => {
+        .then((res) => {
           let val = res.data.match(/\{(.+?)\}/);
           if (val) {
             let val = {
               code: this.fundcode,
-              num: null
+              num: null,
             };
             this.fundListM.push(val);
             chrome.storage.sync.set(
               {
-                fundListM: this.fundListM
+                fundListM: this.fundListM,
               },
               () => {
                 this.getData();
               }
             );
           } else {
-            alert("该基金可能为新发基金，暂无详细数据！");
+            alert("基金详情接口返回空数据，该基金可能不存在");
           }
         })
-        .catch(error => {
+        .catch((error) => {
           alert("无法获取该基金信息！");
         });
     },
-    sortUp (ind) {
+    sortUp(ind) {
       if (ind == 0) {
         return false;
       }
@@ -341,50 +306,50 @@ export default {
       this.$set(this.selectedFunds, ind, val);
       this.fundListM[ind] = [
         this.fundListM[ind - 1],
-        (this.fundListM[ind - 1] = this.fundListM[ind])
+        (this.fundListM[ind - 1] = this.fundListM[ind]),
       ][0];
       chrome.storage.sync.set({
-        fundListM: this.fundListM
+        fundListM: this.fundListM,
       });
     },
-    slt (id) {
-      if (id == this.RealtimeFundcode) {
+    slt(id) {
+      if (id == this.attentionFundcode) {
         chrome.storage.sync.set(
           {
-            RealtimeFundcode: null
+            attentionFundcode: null,
           },
           () => {
-            this.RealtimeFundcode = null;
+            this.attentionFundcode = null;
             chrome.runtime.sendMessage({ type: "endInterval" });
           }
         );
       } else {
         chrome.storage.sync.set(
           {
-            RealtimeFundcode: id
+            attentionFundcode: id,
           },
           () => {
-            this.RealtimeFundcode = id;
+            this.attentionFundcode = id;
             chrome.runtime.sendMessage({ type: "startInterval", id: id });
           }
         );
       }
     },
-    dlt (id) {
+    dlt(id) {
       this.fundListM = this.fundListM.filter(function (ele) {
         return ele.code != id;
       });
 
       chrome.storage.sync.set(
         {
-          fundListM: this.fundListM
+          fundListM: this.fundListM,
         },
         () => {
           this.getData();
         }
       );
-    }
-  }
+    },
+  },
 };
 </script>
 
