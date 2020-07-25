@@ -121,7 +121,6 @@ export default {
     };
   },
   mounted() {
-    alert(1)
     const _that = this;
     chrome.storage.sync.get(
       ["attentionFundcode", "fundListM", "fundList"],
@@ -149,7 +148,7 @@ export default {
     document.body.bgColor = "#fafff8";
 
     const ws = new WebSocket(`ws://${this.serveraddress}`);
-    debugger
+    console.log(ws)
     ws.addEventListener("open", function (event) {
       _that.showTip = true;
       ws.send("jayGao");
@@ -162,10 +161,10 @@ export default {
       alert("websocket服务器连接失败");
       return false;
     };
-    ws.onclose = function () {
-      // 关闭 websocket
-      alert("服务器连接已关闭...");
-    };
+    // ws.onclose = function () {
+    //   // 关闭 websocket
+    //   alert("服务器连接已关闭...");
+    // };
   },
   computed: {
     customClass() {
