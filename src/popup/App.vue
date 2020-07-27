@@ -157,6 +157,7 @@ export default {
   },
   methods: {
     startUpdateData () {
+      // 与后台脚本通信
       chrome.runtime.sendMessage({ type: "DuringDate" }, response => {
         this.isDuringDate = response.farewell;
         if (this.isDuringDate && this.searchIds) {

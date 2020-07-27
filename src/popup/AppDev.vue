@@ -106,11 +106,11 @@ export default {
   data() {
     return {
       showTip: false,
-      serveraddress: "192.168.0.101:9898", // 10.50.214.64
+      serveraddress: "10.50.215.116:9966", // " 192.168.0.101:9898"
       isEdit: false, // 是否编辑
       fundcode: "", // 输入基金的代码
       marketIndexes: [], // 大盘指数数组
-      isDuringDate: false,
+      isDuringDate: true,
       attentionFundcode: "", // 特别关注的基金代码
       selectedFunds: [], // 已自选的基金s数组
       intervalId1: null,
@@ -145,10 +145,11 @@ export default {
         _that.getmarketIndexes();
       }
     );
+    this.startUpdateData();
     document.body.bgColor = "#fafff8";
 
     const ws = new WebSocket(`ws://${this.serveraddress}`);
-    console.log(ws)
+    console.log(ws);
     ws.addEventListener("open", function (event) {
       _that.showTip = true;
       ws.send("jayGao");
@@ -174,6 +175,12 @@ export default {
     },
   },
   methods: {
+    startUpdateData() {
+      // 与后台脚本通信
+      chrome.runtime.sendMessage({ type: "DuringDate" }, (response) => {
+        this.isDuringDate = response.farewell;
+      });
+    },
     option() {
       chrome.tabs.create({ url: "/options/options.html" });
     },
