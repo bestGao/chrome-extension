@@ -16,7 +16,7 @@
   "scripts": {
     "rimraf": "./node_modules/rimraf/bin.js",
     "clean": "rimraf ./dist && mkdir dist",
-    "build": "npm run clean && cross-env webpack --hide-modules",
+    "build": "npm run clean && cross-env usews=false webpack --hide-modules",
     "build:dev": "npm run clean && cross-env usews=true webpack",
     "watch": "cross-env HMR=true npm run build -- --watch",
     "watch:dev": "cross-env HMR=true npm run build:dev -- --watch"
