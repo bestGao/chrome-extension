@@ -22,6 +22,11 @@
 首先，该扩展项目的根目录必须包含一个[manifest.json](https://developer.chrome.com/extensions/manifest)用来配置该扩展程序，chrome 识别该 json 文件
 
 包括实时估值情况，可以增减自选基金。
+关闭弹窗，时popup.html就被销毁
+单击 Chrome 菜单，将鼠标悬停在更多工具上，然后选择 “任务管理器”，以打开任务管理器
+高效的后台脚本包含对其扩展很重要的已注册事件。 它们处于休眠状态，直到触发了侦听器，再采取相应的操作，然后返回休眠状态。保持不需要的脚本运行，对系统资源的浪费。
+
+如果可能，应在 manifest 中注册后台脚本，并将其持久性设置为 false。
 
 首先输入基金代码添加基金，将基金添加特别关注后，可以以角标的形式展示在浏览器中。可以在设置中单独开启显示份额与收益选项，在编辑中输入持有的份额，可以计算出每个基金的实时估值与收益，以及总收益。
 [Vue2.x](https://cn.vuejs.org/v2/guide/instance.html) + [Webpack4.x](https://v4.webpack.js.org/concepts/plugins/)

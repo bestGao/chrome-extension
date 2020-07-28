@@ -1,9 +1,9 @@
 import axios from "axios";
 let Interval;
-
+console.log('我是background.js')
 // 是否休市
 const isDuringDate = () => {
-  // 时区转换为东8区 
+  // 时区转换为东8区
   const zoneOffset = 8;
   const offset8 = new Date().getTimezoneOffset() * 60 * 1000;
   const nowDate8 = new Date().getTime();
@@ -12,60 +12,58 @@ const isDuringDate = () => {
   const endDateAM = new Date();
   const beginDatePM = new Date();
   const endDatePM = new Date();
-
-  beginDateAM.setHours(9, 30, 0);
-  endDateAM.setHours(11, 35, 0);
+  beginDateAM.setHours(9, 0, 0);
+  endDateAM.setHours(12, 0, 0);
   beginDatePM.setHours(13, 0, 0);
-  endDatePM.setHours(15, 5, 0);
-  if (curDate.getDay() == "6" || curDate.getDay() == "0") {
+  endDatePM.setHours(16, 0, 0);
+  if (curDate.getDay() * 1 === 6 || curDate.getDay() * 1 === 0) {
     // 周末休市
     return false;
   } else if (curDate >= beginDateAM && curDate <= endDateAM) {
+    // 上午交易时间
     return true;
   } else if (curDate >= beginDatePM && curDate <= endDatePM) {
+    // 下午交易时间
     return true;
   } else {
     return false;
   }
 };
 
-// 设置特别关注的基金徽标
+// 设置特别关注的基金徽标/涨跌幅
 const setBadge = (fundcode) => {
-  let url =
-    "http://fundgz.1234567.com.cn/js/" +
-    fundcode +
-    ".js?rt=" +
-    new Date().getTime();
+  let url = `http://fundgz.1234567.com.cn/js/${fundcode}.js?rt=${new Date().getTime()}`;
   axios
     .get(url)
-    .then(res => {
+    .then((res) => {
       let val = res.data.match(/\{(.+?)\}/);
       let resData = JSON.parse(val[0]);
       chrome.browserAction.setBadgeText({
-        text: resData.gszzl
+        text: resData.gszzl, // 涨跌幅
       });
-      let color = resData.gszzl >= 0 ? "#F56C6C" : "#4eb61b";
+      let color = resData.gszzl >= 0 ? "red" : "green";
       chrome.browserAction.setBadgeBackgroundColor({
-        color: color
+        color: color,
       });
     })
-    .catch(error => {
+    .catch((error) => {
+      console.log('设置特别关注的基金徽标接口error', error)
       chrome.browserAction.setBadgeText({
-        text: ""
+        text: "",
       });
     });
 };
 
-let startInterval = RealtimeFundcode => {
+let startInterval = (RealtimeFundcode) => {
   endInterval(Interval);
   let Realtime = isDuringDate();
   setBadge(RealtimeFundcode, Realtime);
   Interval = setInterval(() => {
     if (isDuringDate()) {
-      setBadge(RealtimeFundcode, true);
+      setBadge(RealtimeFundcode);
     } else {
       chrome.browserAction.setBadgeBackgroundColor({
-        color: "#4285f4"
+        color: "#4285f4",
       });
     }
   }, 2 * 60 * 1000);
@@ -74,11 +72,11 @@ let startInterval = RealtimeFundcode => {
 var endInterval = () => {
   clearInterval(Interval);
   chrome.browserAction.setBadgeText({
-    text: ""
+    text: "",
   });
 };
 
-const runStart = RealtimeFundcode => {
+const runStart = (RealtimeFundcode) => {
   if (RealtimeFundcode) {
     startInterval(RealtimeFundcode);
   } else {
@@ -86,9 +84,9 @@ const runStart = RealtimeFundcode => {
   }
 };
 
-let RealtimeFundcode = null;
-chrome.storage.sync.get(["RealtimeFundcode"], res => {
-  RealtimeFundcode = res.RealtimeFundcode ? res.RealtimeFundcode : null;
+let RealtimeFundcode;
+chrome.storage.sync.get(["RealtimeFundcode"], (res) => {
+  RealtimeFundcode = res.RealtimeFundcode || '';
   runStart(RealtimeFundcode);
 });
 // 监听来自content script脚本的请求
@@ -96,7 +94,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type == "DuringDate") {
     let DuringDate = isDuringDate();
     sendResponse({
-      farewell: DuringDate
+      farewell: DuringDate,
     });
   }
   if (request.type == "endInterval") {
@@ -107,15 +105,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
   if (request.type == "refreshBadge") {
     chrome.browserAction.setBadgeText({
-      text: request.data.gszzl
+      text: request.data.gszzl,
     });
-    let color = isDuringDate() ?
-      request.data.gszzl >= 0 ?
-        "#F56C6C" :
-        "#4eb61b" :
-      "#4285f4";
+    let color = isDuringDate()
+      ? request.data.gszzl >= 0
+        ? "#F56C6C"
+        : "#4eb61b"
+      : "#4285f4";
     chrome.browserAction.setBadgeBackgroundColor({
-      color: color
+      color: color,
     });
   }
 });

@@ -12,3 +12,5 @@ export const arrayChunk = (array, size) => {
   }
   return result
 }
+
+export const WSHOST = '192.168.0.101:9898'

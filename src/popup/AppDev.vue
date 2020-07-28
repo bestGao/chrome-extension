@@ -101,12 +101,13 @@
 </template>
 
 <script>
+import { WSHOST } from "../util";
 export default {
   name: "vueApp",
   data() {
     return {
       showTip: false,
-      serveraddress: "10.50.215.116:9966", // " 192.168.0.101:9898"
+      serveraddress: WSHOST,
       isEdit: false, // 是否编辑
       fundcode: "", // 输入基金的代码
       marketIndexes: [], // 大盘指数数组
@@ -149,7 +150,6 @@ export default {
     document.body.bgColor = "#fafff8";
 
     const ws = new WebSocket(`ws://${this.serveraddress}`);
-    console.log(ws);
     ws.addEventListener("open", function (event) {
       _that.showTip = true;
       ws.send("jayGao");
