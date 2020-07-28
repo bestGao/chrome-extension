@@ -1,7 +1,7 @@
 {
   "author": "JayGao",
   "name": "funds",
-  "description": "chrome extension",
+  "description": "the chrome extension for tracking funds of your choice",
   "version": "0.1.0",
   "manifest_version": 2,
   "icons": {
@@ -13,10 +13,8 @@
   "homepage_url": "https://github.com/bestGao/theWorldOfJayGao#readme",
   "browser_action": {
     "default_icon": {
-      "19": "assets/icons/icon19.png",
-      "32": "assets/icons/icon32.png",
-      "48": "assets/icons/icon48.png",
-      "128": "assets/icons/icon128.png"
+      "16": "assets/icons/icon32.png",
+      "32": "assets/icons/icon128.png"
     },
     "default_title": "实时更新基金数据",
     "default_popup": "popup/popup.html"
@@ -24,7 +22,7 @@
   "options_page": "options/options.html",
   "options_ui": {
     "page": "options/options.html",
-    "chrome_style": true
+    "chrome_style": false
   },
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "background": {

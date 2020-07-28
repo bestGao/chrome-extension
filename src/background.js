@@ -1,7 +1,7 @@
 import axios from "axios";
-
 let Interval;
 
+// 是否休市
 const isDuringDate = () => {
   // 时区转换为东8区 
   const zoneOffset = 8;
@@ -18,6 +18,7 @@ const isDuringDate = () => {
   beginDatePM.setHours(13, 0, 0);
   endDatePM.setHours(15, 5, 0);
   if (curDate.getDay() == "6" || curDate.getDay() == "0") {
+    // 周末休市
     return false;
   } else if (curDate >= beginDateAM && curDate <= endDateAM) {
     return true;
@@ -28,7 +29,7 @@ const isDuringDate = () => {
   }
 };
 
-// 设置特别关注的基金数据
+// 设置特别关注的基金徽标
 const setBadge = (fundcode) => {
   let url =
     "http://fundgz.1234567.com.cn/js/" +

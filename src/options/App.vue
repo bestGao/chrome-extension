@@ -1,6 +1,7 @@
 <template>
   <div id="app" class="container">
     <div>
+      {{version}}
       <button @click="handleReset" title="重置后您的自定义选项都将失效了">重置</button>
     </div>
   </div>
@@ -9,9 +10,14 @@
 <script>
 export default {
   data () {
-    return {};
+    return {
+      version: ''
+    };
   },
   methods: {
+    getVersion () {
+      chrome.runtime.getManifest().version;
+    },
     handleReset () {
       const result = window.confirm(
         "您的自定义设置将失效，包括显示的大盘指数，确定要重置吗?"
@@ -36,6 +42,9 @@ export default {
     openGithub () {
       window.open("https://github.com/bestGao/funds-chrome-extension");
     },
+  },
+  mounted () {
+    this.getVersion()
   },
 };
 </script>

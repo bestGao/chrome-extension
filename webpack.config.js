@@ -1,9 +1,7 @@
 const webpack = require("webpack");
 const ejs = require("ejs");
-const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
-const ExtensionReloader = require("webpack-extension-reloader");
 const { VueLoaderPlugin } = require("vue-loader");
 
 const config = {
@@ -42,14 +40,6 @@ const config = {
         use: [MiniCssExtractPlugin.loader, "css-loader", "sass-loader"],
       },
       {
-        test: /\.sass$/,
-        use: [
-          MiniCssExtractPlugin.loader,
-          "css-loader",
-          "sass-loader?indentedSyntax",
-        ],
-      },
-      {
         test: /\.(png|jpg|jpeg|gif|svg|ico)$/,
         loader: "file-loader",
         options: {
@@ -57,16 +47,7 @@ const config = {
           outputPath: "assets",
           emitFile: false,
         },
-      },
-      {
-        test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
-        loader: "file-loader",
-        options: {
-          name: "[name].[ext]",
-          outputPath: "/fonts/",
-          emitFile: false,
-        },
-      },
+      }
     ],
   },
   plugins: [
@@ -77,9 +58,6 @@ const config = {
     new VueLoaderPlugin(),
     new MiniCssExtractPlugin({
       filename: "[name].css",
-    }),
-    new ExtensionReloader({
-      manifest: path.resolve(__dirname, "manifest.json"),
     }),
     new CopyPlugin([
       {
