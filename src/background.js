@@ -30,6 +30,23 @@ const isDuringDate = () => {
   }
 };
 
+const options = {
+  id: 'towebsite',
+  title: '查看完整数据',
+  contexts: ['all'],
+  visible: true
+}
+
+chrome.runtime.onInstalled.addListener(function () {
+  chrome.contextMenus.create(options, () => {
+    console.log(`Created contextMenus Success, id:${options.id}`);
+  });
+})
+chrome.contextMenus.onClicked.addListener(function (info, tab) {
+  chrome.tabs.create({
+    url: "https://fund.eastmoney.com"
+  });
+})
 // 设置特别关注的基金徽标/涨跌幅
 const setBadge = (fundcode) => {
   let url = `http://fundgz.1234567.com.cn/js/${fundcode}.js?rt=${new Date().getTime()}`;
@@ -94,7 +111,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type == "DuringDate") {
     let DuringDate = isDuringDate();
     sendResponse({
-      farewell: DuringDate,
+      DuringDate: DuringDate,
     });
   }
   if (request.type == "endInterval") {

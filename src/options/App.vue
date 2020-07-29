@@ -1,8 +1,8 @@
 <template>
   <div id="app" class="container">
-    <div>
-      {{version}}
-      <button @click="handleReset" title="重置后您的自定义选项都将失效了">重置</button>
+    <div class="info">当前版本{{version}}</div>
+    <div class="operation">
+      <div class="btn" @click="handleReset" title="重置后您的自定义选项都将失效">重置</div>
     </div>
   </div>
 </template>
@@ -16,11 +16,11 @@ export default {
   },
   methods: {
     getVersion () {
-      chrome.runtime.getManifest().version;
+      this.version = chrome.runtime.getManifest().version;
     },
     handleReset () {
       const result = window.confirm(
-        "您的自定义设置将失效，包括显示的大盘指数，确定要重置吗?"
+        "您的自定义设置将失效，包括设置的的大盘指数，确定要重置吗?"
       );
       if (!result) {
         return false;
@@ -38,10 +38,7 @@ export default {
         },
         function () { }
       );
-    },
-    openGithub () {
-      window.open("https://github.com/bestGao/funds-chrome-extension");
-    },
+    }
   },
   mounted () {
     this.getVersion()
@@ -51,102 +48,21 @@ export default {
 
 <style lang="scss" scoped>
 .container {
-  min-width: 630px;
-  min-height: 520px;
-  text-align: center;
-  padding-top: 15px;
-  font-size: 13px;
-  font-family: "Helvetica Neue", Helvetica, Arial, "PingFang SC",
-    "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei",
-    sans-serif;
-}
-
-.setting-list {
-  width: 600px;
-  margin: 0 auto;
-  text-align: left;
-  padding: 0;
-}
-
-.setting-list li {
-  list-style: none;
-  font-size: 16px;
-  border-bottom: 1px solid #dddddd;
-  padding: 10px 0;
-}
-
-.setting-list li p {
-  margin: 0;
-  font-size: 14px;
-  color: #999999;
-}
-
-.list-title {
-  min-height: 34px;
-  line-height: 34px;
-}
-
-.list-title .select-row {
-  line-height: 30px;
-  padding-left: 20px;
-}
-
-.btn {
-  display: inline-block;
-  line-height: 1;
-  cursor: pointer;
-  background: #fff;
-  padding: 6px 8px;
-  border-radius: 3px;
-  font-size: 14px;
-  color: #000000;
-  margin: 0 5px;
-  border: 1px solid #dcdfe6;
-}
-
-.btn[disabled] {
-  color: #aaaaaa;
-}
-
-.icon-btn-row {
-  position: relative;
-}
-
-.githubIcon {
-  position: absolute;
-  top: -4px;
-  left: 12px;
-}
-.githubText {
-  padding-left: 30px;
-  padding: 8px 8px 8px 36px;
-}
-
-.slt {
-  color: #fff;
-  background-color: #67c23a;
-  border-color: #67c23a;
-}
-
-.input-row {
-  text-align: center;
-  margin-top: 10px;
-}
-
-.tips {
-  font-size: 12px;
-  margin: 0;
-  color: #aaaaaa;
-  line-height: 1.4;
-  padding: 5px 15px;
-}
-.primary {
-  color: #409eff;
-  border-color: #409eff;
-}
-
-.black {
-  color: #24292e;
-  border-color: #24292e;
+  background-color: #fff8f1;
+  padding: 20px;
+  .info {
+    padding: 10px;
+  }
+  .operation {
+    .btn {
+      padding: 10px 28px;
+      font-size: 20px;
+      background-color: #727cec;
+      color: white;
+      display: inline-block;
+      border-radius: 20px;
+      font-family: monospace;
+    }
+  }
 }
 </style>

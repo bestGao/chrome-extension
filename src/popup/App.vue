@@ -1,90 +1,85 @@
 <template>
   <div id="app" class="container" :class="customClass">
-    <div>
-      <div class="tab-row" :key="index" v-for="(rowItem, index) of marketIndexes">
-        <div
-          v-for="el in rowItem"
-          class="tab-col"
-          :key="el.f12"
-          :class="el.f4 >= 0 ? 'up' : 'down'"
-        >
-          <div class="close-icon-wrapper" @click="closeItem(el)">
-            <img class="close-icon" src="/assets/images/icon_close.png" alt="不再显示" title="不看这条指数" />
-          </div>
-          <p title="大盘指数名">{{ el.f14 }}</p>
-          <p
-            :class="el.f4 >= 0 ? 'up' : 'down'"
-            title="最新价"
-            :style="{'font-size': '20px'}"
-          >{{ el.f2 }}</p>
-          <p :class="el.f4 >= 0 ? 'up' : 'down'">涨跌额：{{ el.f4 }}</p>
-          <p :class="el.f4 >= 0 ? 'up' : 'down'">涨跌幅：{{ el.f3 }}%</p>
+    <div class="tab-row" :key="index" v-for="(rowItem, index) of marketIndexes">
+      <div v-for="el of rowItem" class="tab-col" :key="el.f12" :class="el.f4 >= 0 ? 'up' : 'down'">
+        <div class="close-icon-wrapper" @click="closeItem(el)">
+          <img class="close-icon" src="/assets/images/icon_close.png" alt="不再显示" title="不看这条指数" />
         </div>
+        <p title="大盘指数名">{{ el.f14 }}</p>
+        <p
+          :class="el.f4 >= 0 ? 'up' : 'down'"
+          title="最新价"
+          :style="{'font-size': '20px'}"
+        >{{ el.f2 }}</p>
+        <p :class="el.f4 >= 0 ? 'up' : 'down'">涨跌额：{{ el.f4 }}</p>
+        <p :class="el.f4 >= 0 ? 'up' : 'down'">涨跌幅：{{ el.f3 }}%</p>
       </div>
-      <template v-if="selectedFunds.length">
-        <div
-          :style="{'text-align': 'center', 'margin-top': '10px', 'font-size': '16px', 'color': 'pink'}"
-          v-if="selectedFunds.length"
-        >{{isDuringDate ? '基金数据实时更新中' : '休市中'}}</div>
-        <table>
-          <thead>
-            <tr>
-              <th>基金名称</th>
-              <th v-if="isEdit">基金代码</th>
-              <th v-if="!isEdit">估算净值</th>
-              <th>涨跌幅</th>
-              <th>持有金额（元）</th>
-              <th>估算收益（元）</th>
-              <th v-if="!isEdit">更新时间</th>
-              <th v-if="isEdit">持有份额</th>
-              <th v-if="isEdit">排序</th>
-              <th v-if="isEdit" title="收藏一个基金，后台脚本自动更新估值和涨跌幅，并在扩展图标中以徽标的形式显示。">特别关注</th>
-              <th v-if="isEdit">删除</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(el, index) in selectedFunds" :key="el.fundcode">
-              <td class="fundName" :title="el.name">{{ el.name }}</td>
-              <td v-if="isEdit">{{ el.fundcode }}</td>
-              <td v-if="!isEdit">{{ el.gsz }}</td>
-              <td :class="el.gszzl >= 0 ? 'up' : 'down'">{{ el.gszzl }}%</td>
-              <td>{{ calculateMoney(el) }}</td>
-              <td :class="el.gszzl >= 0 ? 'up' : 'down'">{{ calculate(el) }}</td>
-              <td v-if="!isEdit">{{ el.gztime.substr(5) }}</td>
-              <th v-if="isEdit && isEdit">
-                <input
-                  class="btn num"
-                  placeholder="输入持有份额"
-                  v-model="el.num"
-                  @input="changeNum(el, index)"
-                  type="text"
-                />
-              </th>
-              <td v-if="isEdit">
-                <button title="上移" @click="sortUp(index)" class="btn edit">👆</button>
-              </td>
-              <td v-if="isEdit">
-                <button
-                  @click="slt(el.fundcode)"
-                  :class="el.fundcode == RealtimeFundcode ? 'slt' : ''"
-                  class="btn edit"
-                  title="设为徽标"
-                >💗</button>
-              </td>
-              <td v-if="isEdit">
-                <button title="取消自选" @click="dlt(el.fundcode)" class="btn red edit">❌</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </template>
-      <template v-else>
-        <div :style="{'text-align':'center', 'padding': '10px'}">请添加想要关注的基金</div>
-      </template>
     </div>
+    <template v-if="selectedFunds.length">
+      <div
+        :style="{'text-align': 'center', 'margin-top': '10px', 'font-size': '16px', 'color': 'pink'}"
+        :class="isDuringDate ? 'up' : 'down'"
+        v-if="selectedFunds.length"
+      >{{isDuringDate ? '基金数据实时更新中' : '休市中'}}</div>
+      <table>
+        <thead>
+          <tr>
+            <th>基金名称</th>
+            <th v-if="isEdit">基金代码</th>
+            <th v-if="!isEdit">估算净值</th>
+            <th>涨跌幅</th>
+            <th>持有金额（元）</th>
+            <th>估算收益（元）</th>
+            <th v-if="!isEdit">更新时间</th>
+            <th v-if="isEdit">持有份额</th>
+            <th v-if="isEdit && selectedFunds.length > 1">排序</th>
+            <th v-if="isEdit" title="收藏一个基金，后台脚本自动更新估值和涨跌幅，并在此扩展图标中以徽标的形式显示。">收藏</th>
+            <th v-if="isEdit">删除</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(el, index) of selectedFunds" :key="el.fundcode">
+            <td class="fundName" :title="el.name">{{ el.name }}</td>
+            <td v-if="isEdit">{{ el.fundcode }}</td>
+            <td v-if="!isEdit">{{ el.gsz }}</td>
+            <td :class="el.gszzl >= 0 ? 'up' : 'down'">{{ el.gszzl }}%</td>
+            <td>{{ calculateMoney(el) }}</td>
+            <td :class="el.gszzl >= 0 ? 'up' : 'down'">{{ calculate(el) }}</td>
+            <td v-if="!isEdit">{{ el.gztime.substr(5) }}</td>
+            <th v-if="isEdit">
+              <input
+                class="input num"
+                placeholder="输入持有份额"
+                v-model="el.num"
+                @input="changeNum(el, index)"
+                type="number"
+                :min="0"
+              />
+            </th>
+            <td v-if="isEdit && selectedFunds.length > 1">
+              <button title="上移" @click="sortUp(index)" class="btn edit">👆</button>
+            </td>
+            <td v-if="isEdit">
+              <button
+                @click="slt(el.fundcode)"
+                :class="el.fundcode == RealtimeFundcode ? 'slt' : ''"
+                class="btn edit"
+                title="设为徽标"
+              >💗</button>
+            </td>
+            <td v-if="isEdit">
+              <button title="取消自选" @click="dlt(el.fundcode)" class="btn red edit">❌</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </template>
+    <template v-else>
+      <div :style="{'text-align':'center', 'padding': '10px'}">请添加想要关注的基金</div>
+    </template>
     <div v-if="isEdit" class="input-row">
       <span>添加新基金:</span>
-      <input v-model="fundcode" class="btn" type="number" placeholder="请输入基金代码" />
+      <input class="input" v-model="fundcode" :min="0" type="number" placeholder="请输入基金代码" />
       <button @click="save" class="btn">确定</button>
     </div>
     <div class="input-row">
@@ -115,28 +110,14 @@ export default {
       selectedFunds: [], // 已添加的基金详情列表
       intervalId1: null,
       intervalId2: null,
-      fundList: [],
-      fundListM: [],
       allGains: 0, // 估算收益
       originalMarketIndexes: []
     };
   },
   mounted () {
     chrome.storage.sync.get(
-      ["RealtimeFundcode", "fundListM", "fundList", "searchIds"],
+      ["RealtimeFundcode", "searchIds"],
       res => {
-        this.fundList = res.fundList ? res.fundList : this.fundList;
-        if (res.fundListM) {
-          this.fundListM = res.fundListM;
-        } else {
-          for (const fund of this.fundList) {
-            let val = {
-              code: fund,
-              num: null
-            };
-            this.fundListM.push(val);
-          }
-        }
         this.RealtimeFundcode = res.RealtimeFundcode;
         this.searchIds = res.searchIds;
         this.getData();
@@ -148,28 +129,27 @@ export default {
   },
   computed: {
     customClass () {
-      if (this.rewardShadow) {
-        return "more-height";
-      } else if (this.isEdit) {
+      if (this.isEdit) {
         return "more-width";
       }
-    }
+    },
   },
   methods: {
     startUpdateData () {
+      const _that = this
       // 与后台脚本通信
       chrome.runtime.sendMessage({ type: "DuringDate" }, response => {
-        this.isDuringDate = response.farewell;
-        if (this.isDuringDate && this.searchIds) {
-          this.intervalId1 = setInterval(() => {
-            this.getmarketIndexes();
+        _that.isDuringDate = response.isDuringDate;
+        if (_that.isDuringDate && _that.searchIds) {
+          _that.intervalId1 = setInterval(() => {
+            _that.getmarketIndexes();
           }, 5 * 1000);
-          this.intervalId2 = setInterval(() => {
-            this.getData();
+          _that.intervalId2 = setInterval(() => {
+            _that.getData();
           }, 60 * 1000);
         } else {
-          clearInterval(this.intervalId1);
-          clearInterval(this.intervalId2);
+          clearInterval(_that.intervalId1);
+          clearInterval(_that.intervalId2);
         }
       });
     },
@@ -194,6 +174,7 @@ export default {
       this.originalMarketIndexes = sd;
       this.marketIndexes = arrayChunk(sd, 3);
       this.searchIds = sd1
+      console.log('最后')
       chrome.storage.sync.set({ 'searchIds': sd1 })
     },
     option () {
@@ -215,14 +196,7 @@ export default {
       });
     },
     getData () {
-      // 	  ["fundcode"]=>"519983"           //基金代码
-      // 	  ["name"]=>"长信量化先锋混合A"    //基金名称
-      // 	  ["jzrq"]=>"2018-09-21"           //净值日期
-      // 	  ["dwjz"]=>"1.2440"               //当日净值
-      // 	  ["gsz"]=>"1.2388"                //估算净值
-      // 	  ["gszzl"]=>"-0.42"               //估算涨跌百分比 即-0.42%
-      // 	  ["gztime"]=>"2018-09-25 15:00"   //估值时间
-      // console.log('getData', this.searchIds)
+      /* fundcode 基金代码 name 基金名称 jzrq 净值日期 dwjz 当日净值 gsz 估算净值 gszzl 估算涨跌百分比 gztime 估值时间 */
       let axiosArray = [];
       for (const fund of this.fundListM) {
         let url =
@@ -370,20 +344,6 @@ export default {
           }
         );
       }
-    },
-    dlt (id) {
-      this.fundListM = this.fundListM.filter(function (ele) {
-        return ele.code != id;
-      });
-
-      chrome.storage.sync.set(
-        {
-          fundListM: this.fundListM
-        },
-        () => {
-          this.getData();
-        }
-      );
     }
   }
 };
@@ -396,9 +356,6 @@ export default {
   overflow-y: auto;
   padding: 8px 2px;
   font-size: 12px;
-  font-family: "Helvetica Neue", Helvetica, Arial, "PingFang SC",
-    "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei",
-    sans-serif;
 }
 
 .more-height {
@@ -406,7 +363,7 @@ export default {
 }
 
 .more-width {
-  width: 700px;
+  width: 750px;
 }
 
 .num-all-width {
@@ -443,17 +400,25 @@ tbody tr:hover {
 }
 
 .btn {
-  display: inline-block;
-  line-height: 1;
   cursor: pointer;
-  background: #fff;
-  padding: 5px 6px;
-  border-radius: 3px;
-  font-size: 12px;
-  color: #000000;
-  margin: 0 5px;
+  background-color: #f7adad;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 18px;
+  color: #1f1018;
+  margin: 0 10px;
   outline: none;
-  border: 1px solid #dcdfe6;
+  text-shadow: none;
+  box-shadow: none;
+  border: none;
+  font-family: cursive;
+}
+
+.input {
+  padding: 4px 8px;
+  border-radius: 20px;
+  border: none;
+  outline: none;
 }
 
 .btn.edit {

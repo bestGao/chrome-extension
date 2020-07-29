@@ -25,6 +25,7 @@
       <template v-if="selectedFunds.length">
         <div
           :style="{'text-align': 'center', 'margin-top': '10px', 'font-size': '16px', 'color': 'pink'}"
+          :class="isDuringDate ? 'up' : 'down'"
           v-if="selectedFunds.length"
         >{{isDuringDate ? '基金数据实时更新中' : '休市中'}}</div>
         <table>
@@ -39,7 +40,7 @@
               <th v-if="!isEdit">更新时间</th>
               <th v-if="isEdit">持有份额</th>
               <th v-if="isEdit && selectedFunds.length > 1">排序</th>
-              <th v-if="isEdit" title="收藏一个基金，后台脚本自动更新估值和涨跌幅，并在扩展图标中以徽标的形式显示。">特别关注</th>
+              <th v-if="isEdit" title="收藏一个基金，后台脚本自动更新估值和涨跌幅，并在此扩展图标中以徽标的形式显示。">特别关注</th>
               <th v-if="isEdit">删除</th>
             </tr>
           </thead>
@@ -52,13 +53,14 @@
               <td>{{ calculateMoney(el) }}</td>
               <td :class="el.gszzl >= 0 ? 'up' : 'down'">{{ calculate(el) }}</td>
               <td v-if="!isEdit">{{ el.gztime.substr(5) }}</td>
-              <th v-if="isEdit && isEdit">
+              <th v-if="isEdit">
                 <input
                   class="btn num"
                   placeholder="输入持有份额"
                   v-model="el.num"
                   @input="changeNum(el, index)"
-                  type="text"
+                  type="number"
+                  :min="0"
                 />
               </th>
               <td v-if="isEdit && selectedFunds.length > 1">
@@ -104,7 +106,7 @@
 import { WSHOST } from "../util";
 export default {
   name: "vueApp",
-  data() {
+  data () {
     return {
       showTip: false,
       serveraddress: WSHOST,
@@ -121,7 +123,7 @@ export default {
       allGains: 0, // 估算收益
     };
   },
-  mounted() {
+  mounted () {
     const _that = this;
     chrome.storage.sync.get(
       ["attentionFundcode", "fundListM", "fundList"],
@@ -168,23 +170,23 @@ export default {
     // };
   },
   computed: {
-    customClass() {
+    customClass () {
       if (this.isEdit) {
         return "more-width";
       }
     },
   },
   methods: {
-    startUpdateData() {
+    startUpdateData () {
       // 与后台脚本通信
       chrome.runtime.sendMessage({ type: "DuringDate" }, (response) => {
-        this.isDuringDate = response.farewell;
+        this.isDuringDate = response.isDuringDate;
       });
     },
-    option() {
+    option () {
       chrome.tabs.create({ url: "/options/options.html" });
     },
-    getmarketIndexes() {
+    getmarketIndexes () {
       // f1-f18: 指数参数 1.000001 是上证指数代号
       let url =
         `https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&fields=f2,f3,f4,f12,f14&secids=1.000001,0.399006,100.HSI&_=` +
@@ -193,8 +195,8 @@ export default {
         this.marketIndexes = res.data.data.diff;
       });
     },
-    getData() {
-      /* 	  fundcode 基金代码 name 基金名称 jzrq 净值日期 dwjz 当日净值 gsz 估算净值 gszzl 估算涨跌百分比 gztime 估值时间 */
+    getData () {
+      /* fundcode 基金代码 name 基金名称 jzrq 净值日期 dwjz 当日净值 gsz 估算净值 gszzl 估算涨跌百分比 gztime 估值时间 */
       let axiosArray = [];
       for (const fund of this.fundListM) {
         let url =
@@ -233,14 +235,14 @@ export default {
           console.log("数据请求出现错误！");
         });
     },
-    getAllGains() {
+    getAllGains () {
       let allGains = 0;
       this.selectedFunds.forEach((val) => {
         allGains += parseFloat(this.calculate(val));
       });
       this.allGains = Number(allGains.toString().match(/^\d+(?:\.\d{0,2})?/));
     },
-    changeNum(item, ind) {
+    changeNum (item, ind) {
       for (let fund of this.fundListM) {
         if (fund.code == item.fundcode) {
           fund.num = item.num;
@@ -251,17 +253,17 @@ export default {
       });
       this.getAllGains();
     },
-    calculateMoney(val) {
+    calculateMoney (val) {
       let sum = val.dwjz * val.num;
       sum = Number(sum.toString().match(/^\d+(?:\.\d{0,2})?/));
       return sum;
     },
-    calculate(val) {
+    calculate (val) {
       let sum = (val.gsz - val.dwjz) * val.num;
       sum = Number(sum.toString().match(/^\d+(?:\.\d{0,2})?/));
       return sum;
     },
-    save() {
+    save () {
       let hasCode = this.fundListM.some((currentValue, index, array) => {
         return currentValue.code == this.fundcode;
       });
@@ -302,7 +304,7 @@ export default {
           alert("无法获取该基金信息！");
         });
     },
-    sortUp(ind) {
+    sortUp (ind) {
       if (ind == 0) {
         return false;
       }
@@ -318,7 +320,7 @@ export default {
         fundListM: this.fundListM,
       });
     },
-    slt(id) {
+    slt (id) {
       if (id == this.attentionFundcode) {
         chrome.storage.sync.set(
           {
@@ -341,7 +343,7 @@ export default {
         );
       }
     },
-    dlt(id) {
+    dlt (id) {
       this.fundListM = this.fundListM.filter(function (ele) {
         return ele.code != id;
       });
@@ -376,7 +378,7 @@ export default {
 }
 
 .more-width {
-  width: 700px;
+  width: 750px;
 }
 
 .num-all-width {

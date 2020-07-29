@@ -1,8 +1,10 @@
 const webpack = require("webpack");
 const ejs = require("ejs");
+const path = require('path')
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 const { VueLoaderPlugin } = require("vue-loader");
+const ExtensionReloader = require('webpack-extension-reloader');
 
 const config = {
   mode: "production",
@@ -55,6 +57,9 @@ const config = {
       // webpack built-in plugin
       global: "window",
     }),
+    new ExtensionReloader({
+      manifest: path.resolve(__dirname + "/src", "manifest.json")
+    }),
     new VueLoaderPlugin(),
     new MiniCssExtractPlugin({
       filename: "[name].css",
@@ -83,7 +88,7 @@ const config = {
   ],
 };
 
-function transformHtml(content) {
+function transformHtml (content) {
   return ejs.render(content.toString(), {
     ...process.env,
   });

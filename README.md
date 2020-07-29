@@ -28,6 +28,10 @@
 
 如果可能，应在 manifest 中注册后台脚本，并将其持久性设置为 false。
 
+[options](https://developer.chrome.com/extensions/options)
+
+[添加右键显示菜单](https://developer.chrome.com/apps/contextMenus)
+
 首先输入基金代码添加基金，将基金添加特别关注后，可以以角标的形式展示在浏览器中。可以在设置中单独开启显示份额与收益选项，在编辑中输入持有的份额，可以计算出每个基金的实时估值与收益，以及总收益。
 [Vue2.x](https://cn.vuejs.org/v2/guide/instance.html) + [Webpack4.x](https://v4.webpack.js.org/concepts/plugins/)
 

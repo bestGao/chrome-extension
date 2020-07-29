@@ -1,33 +1,39 @@
 {
   "author": "JayGao",
-  "name": "funds",
+  "name": "real time funds's data",
+  "short_name": "funds data with real time update",
   "description": "the chrome extension for tracking funds of your choice",
   "version": "0.1.0",
   "manifest_version": 2,
   "icons": {
-    "16": "assets/icons/icon16.png",
-    "32": "assets/icons/icon32.png",
-    "48": "assets/icons/icon48.png",
+    "16": "assets/icons/icon32.png",
+    "32": "assets/icons/icon48.png",
+    "48": "assets/icons/icon128.png",
     "128": "assets/icons/icon128.png"
   },
-  "homepage_url": "https://github.com/bestGao/theWorldOfJayGao#readme",
+  "commands": {
+    "open-pdf": {
+      "description": "__MSG_command_open_pdf__"
+    }
+  },
+  "homepage_url": "https://github.com/bestGao/chrome-extension#readme",
   "browser_action": {
     "default_icon": {
-      "16": "assets/icons/icon32.png",
-      "32": "assets/icons/icon128.png"
+      "16": "assets/icons/icon128.png",
+      "32": "assets/icons/icon32.png"
     },
     "default_title": "实时更新基金数据",
     "default_popup": "popup/popup.html"
   },
-  "options_page": "options/options.html",
   "options_ui": {
     "page": "options/options.html",
-    "chrome_style": false
+    "chrome_style": false,
+    "open_in_tab": false
   },
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "background": {
     "persistent": false,
     "scripts": ["background.js"]
   },
-  "permissions": ["storage", "http://fundgz.1234567.com.cn/js/*", "https://push2.eastmoney.com/api/*"]
+  "permissions": ["contextMenus", "tabs", "storage", "http://fundgz.1234567.com.cn/js/*", "https://push2.eastmoney.com/api/*"]
 }
