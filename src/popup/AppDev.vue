@@ -320,14 +320,15 @@ export default {
         fundListM: this.fundListM,
       });
     },
+    // 设置特别关注的基金
     slt (id) {
       if (id == this.attentionFundcode) {
         chrome.storage.sync.set(
           {
-            attentionFundcode: null,
+            attentionFundcode: undefined,
           },
           () => {
-            this.attentionFundcode = null;
+            this.attentionFundcode = undefined;
             chrome.runtime.sendMessage({ type: "endInterval" });
           }
         );
@@ -344,6 +345,7 @@ export default {
       }
     },
     dlt (id) {
+      // 删除一个自选的基金
       this.fundListM = this.fundListM.filter(function (ele) {
         return ele.code != id;
       });
