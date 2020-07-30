@@ -7,7 +7,7 @@ const { VueLoaderPlugin } = require("vue-loader");
 const ExtensionReloader = require('webpack-extension-reloader');
 
 const config = {
-  mode: "production",
+  mode: "development",
   context: __dirname + "/src",
   entry: {
     'background': "./background.js",

@@ -1,6 +1,6 @@
 import axios from "axios";
 let Interval;
-console.log('我是background.js')
+// console.log("我是background.js");
 // 是否休市
 const isDuringDate = () => {
   // 时区转换为东8区
@@ -31,22 +31,22 @@ const isDuringDate = () => {
 };
 
 const options = {
-  id: 'towebsite',
-  title: '查看完整数据',
-  contexts: ['all'],
-  visible: true
-}
+  id: "towebsite",
+  title: "查看完整数据",
+  contexts: ["all"],
+  visible: true,
+};
 
-chrome.runtime.onInstalled.addListener(function () {
+chrome.runtime.onInstalled.addListener(function() {
   chrome.contextMenus.create(options, () => {
-    console.log(`Created contextMenus Success, id:${options.id}`);
+    // console.log(`Created contextMenus Success, id:${options.id}`);
   });
-})
-chrome.contextMenus.onClicked.addListener(function (info, tab) {
+});
+chrome.contextMenus.onClicked.addListener(function(info, tab) {
   chrome.tabs.create({
-    url: "https://fund.eastmoney.com"
+    url: "https://fund.eastmoney.com",
   });
-})
+});
 // 设置特别关注的基金徽标/涨跌幅
 const setBadge = (fundcode) => {
   let url = `http://fundgz.1234567.com.cn/js/${fundcode}.js?rt=${new Date().getTime()}`;
@@ -64,24 +64,19 @@ const setBadge = (fundcode) => {
       });
     })
     .catch((error) => {
-      console.log('设置特别关注的基金徽标接口error', error)
+      console.log("设置特别关注的基金徽标接口error", error);
       chrome.browserAction.setBadgeText({
         text: "",
       });
     });
 };
 
-let startInterval = (RealtimeFundcode) => {
+let startInterval = (attentionFundcode) => {
   endInterval(Interval);
-  let Realtime = isDuringDate();
-  setBadge(RealtimeFundcode, Realtime);
+  setBadge(attentionFundcode);
   Interval = setInterval(() => {
-    if (isDuringDate()) {
-      setBadge(RealtimeFundcode);
-    } else {
-      chrome.browserAction.setBadgeBackgroundColor({
-        color: "#4285f4",
-      });
+    if (true || isDuringDate()) {
+      setBadge(attentionFundcode);
     }
   }, 2 * 60 * 1000);
 };
@@ -93,28 +88,26 @@ var endInterval = () => {
   });
 };
 
-const runStart = (RealtimeFundcode) => {
-  if (RealtimeFundcode) {
-    startInterval(RealtimeFundcode);
+const runStart = (attentionFundcode) => {
+  if (attentionFundcode) {
+    startInterval(attentionFundcode);
   } else {
     endInterval();
   }
 };
 
-let RealtimeFundcode;
-chrome.storage.sync.get(["RealtimeFundcode"], (res) => {
-  RealtimeFundcode = res.RealtimeFundcode || '';
-  runStart(RealtimeFundcode);
+let attentionFundcode;
+chrome.storage.sync.get(["attentionFundcode"], (res) => {
+  attentionFundcode = res.attentionFundcode || "";
+  runStart(attentionFundcode);
 });
 // 监听来自content script脚本的请求
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log(sender.tab ?
-    "来自内容脚本：" + sender.tab.url :
-    "来自扩展程序");
+  // console.log(sender.tab ? "来自内容脚本：" + sender.tab.url : "来自扩展程序");
   if (request.type == "DuringDate") {
     let DuringDate = isDuringDate();
     sendResponse({
-      DuringDate: DuringDate,
+      isEffective: DuringDate,
     });
   }
   if (request.type == "endInterval") {

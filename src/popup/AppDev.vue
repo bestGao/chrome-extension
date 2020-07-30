@@ -128,7 +128,6 @@ export default {
     chrome.storage.sync.get(
       ["attentionFundcode", "fundListM", "fundList"],
       (res) => {
-        debugger;
         _that.fundList = res.fundList ? res.fundList : _that.fundList;
         if (res.fundListM) {
           _that.fundListM = res.fundListM;
