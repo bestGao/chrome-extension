@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="container" :class="customClass">
+  <div id="app" :class="['container', {'more-width' :isEdit}]">
     <div>
       <div
         v-if="showTip"
@@ -168,13 +168,6 @@ export default {
     //   // 关闭 websocket
     //   alert("服务器连接已关闭...");
     // };
-  },
-  computed: {
-    customClass () {
-      if (this.isEdit) {
-        return "more-width";
-      }
-    },
   },
   methods: {
     startUpdateData () {

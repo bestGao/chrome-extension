@@ -108,6 +108,9 @@ chrome.storage.sync.get(["RealtimeFundcode"], (res) => {
 });
 // 监听来自content script脚本的请求
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  console.log(sender.tab ?
+    "来自内容脚本：" + sender.tab.url :
+    "来自扩展程序");
   if (request.type == "DuringDate") {
     let DuringDate = isDuringDate();
     sendResponse({
@@ -120,6 +123,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type == "startInterval") {
     startInterval(request.id);
   }
+  /* 更新特别关注基金涨跌幅 */
   if (request.type == "refreshBadge") {
     chrome.browserAction.setBadgeText({
       text: request.data.gszzl,
