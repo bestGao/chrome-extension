@@ -1,6 +1,9 @@
 <template>
   <div id="app" class="container">
-    <div class="info">当前版本{{version}}</div>
+    <div class="info">
+      当前版本：
+      <span class="info-version">{{version}}</span>
+    </div>
     <div class="operation">
       <div class="btn" @click="handleReset" title="重置后您的自定义选项都将失效">重置</div>
     </div>
@@ -52,6 +55,10 @@ export default {
   padding: 20px;
   .info {
     padding: 10px;
+    &-version {
+      font-size: 16px;
+      color: pink;
+    }
   }
   .operation {
     .btn {

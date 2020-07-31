@@ -17,7 +17,7 @@
       </div>
     </div>
     <div class="date-tip">
-      {{isDuringDate ? '基金数据实时更新中' : '休市中'}}
+      {{isDuringDate ? (selectedFunds.length ? '基金数据实时更新中' :'') : '休市中'}}
       <span
         :style="{'font-size': '12px', color: '#c0c0c0'}"
       >{{isDuringDate ? '' :'(不会实时更新数据)'}}</span>
@@ -64,8 +64,12 @@
             </td>
             <td v-if="isEdit">
               <div @click="toggleFavorite(el.fundcode)" class="icon" title="是否收藏">
-                <span v-if="el.fundcode === attentionFundcode">💗</span>
-                <span v-else>❤️</span>
+                <span v-if="el.fundcode === attentionFundcode">
+                  <img class="icon-image" src="/assets/images/fav_actived.png" />
+                </span>
+                <span v-else>
+                  <img class="icon-image" src="/assets/images/fav_empty.png" />
+                </span>
               </div>
             </td>
             <td v-if="isEdit">
@@ -103,7 +107,7 @@
 import { arrayChunk } from "../util";
 
 export default {
-  data() {
+  data () {
     return {
       searchIds: [], // 大盘指数id数组
       isEdit: false, // 是否编辑
@@ -118,8 +122,7 @@ export default {
       originalMarketIndexes: [], // 大盘指数数组
     };
   },
-  mounted() {
-    // this.fetchFundsData();
+  mounted () {
     chrome.storage.sync.get(
       ["attentionFundcode", "searchIds", "storedFunds"],
       (res) => {
@@ -139,13 +142,14 @@ export default {
         }
         // console.log("自选的基金", res.storedFunds);
         this.selectedFunds = res.storedFunds || [];
+        this.fetchFundsData();
         this.startUpdateData();
       }
     );
     document.body.bgColor = "#fafff8";
   },
   methods: {
-    startUpdateData() {
+    startUpdateData () {
       const _that = this;
       // 与后台脚本background.js通信
       chrome.runtime.sendMessage({ type: "DuringDate" }, (res) => {
@@ -170,7 +174,7 @@ export default {
         }
       });
     },
-    closeItem(item) {
+    closeItem (item) {
       const result = window.confirm("确定不再展示该指数?");
       if (!result) {
         return false;
@@ -193,11 +197,11 @@ export default {
       this.searchIds = sd1;
       chrome.storage.sync.set({ searchIds: sd1 });
     },
-    option() {
+    option () {
       window.open("/options/options.html");
       // chrome.tabs.create({ url: "/options/options.html" });
     },
-    getmarketIndexes() {
+    getmarketIndexes () {
       // f1-f18: 指数参数 1.000001 是上证指数代号
       let url = `https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&fields=f2,f3,f4,f12,f14&secids=${this.searchIds.join(
         ","
@@ -208,7 +212,7 @@ export default {
       });
     },
     /* 请求自选的基金数据 */
-    fetchFundsData() {
+    fetchFundsData () {
       /* fundcode 基金代码 name 基金名称 jzrq 净值日期 dwjz 当日净值 gsz 估算净值 gszzl 估算涨跌百分比 gztime 估值时间 */
       const _that = this;
       let axiosArray = [];
@@ -254,14 +258,14 @@ export default {
           console.log("数据请求出现错误！");
         });
     },
-    getAllGains() {
+    getAllGains () {
       let allGains = 0;
       this.selectedFunds.forEach((val) => {
         allGains += parseFloat(this.calculate(val));
       });
-      this.allGains = allGains.toFixed(1);
+      this.allGains = allGains.toFixed(2);
     },
-    changeNum(item) {
+    changeNum (item) {
       for (let fund of this.selectedFunds) {
         if (fund.fundcode == item.fundcode) {
           fund.num = item.num;
@@ -272,15 +276,15 @@ export default {
       });
       this.getAllGains();
     },
-    calculateMoney(val) {
+    calculateMoney (val) {
       let sum = val ? (val.dwjz * val.num).toFixed(2) : 0;
       return sum;
     },
-    calculate(val) {
+    calculate (val) {
       let sum = val ? ((val.gsz - val.dwjz) * val.num).toFixed(2) : 0;
       return sum;
     },
-    handleAdd() {
+    handleAdd () {
       const _that = this;
       // 判断是否已存在
       let hasCode;
@@ -298,7 +302,7 @@ export default {
       // 获取基金详情
       let url = `http://fundgz.1234567.com.cn/js/${
         this.fundcode
-      }.js?rt=${new Date().getTime()}`;
+        }.js?rt=${new Date().getTime()}`;
       this.$axios
         .get(url)
         .then((res) => {
@@ -331,8 +335,7 @@ export default {
           alert("无法获取该基金信息！");
         });
     },
-    sortUp(index) {
-      // debugger
+    sortUp (index) {
       let val = this.selectedFunds[index - 1];
       // vue实例创建后给selectedFunds对象添加新的属性
       this.$set(this.selectedFunds, index - 1, this.selectedFunds[index]);
@@ -346,8 +349,18 @@ export default {
       });
     },
     // 删除单个自选的基金
-    deleteFund(id) {
-      debugger;
+    deleteFund (id) {
+      if (id == this.attentionFundcode) {
+        chrome.storage.sync.set(
+          {
+            attentionFundcode: null,
+          },
+          () => {
+            _that.attentionFundcode = null;
+            chrome.runtime.sendMessage({ type: "endInterval" });
+          }
+        );
+      }
       const _that = this;
       this.selectedFunds = this.selectedFunds.filter(function (ele) {
         return ele.fundcode !== id;
@@ -361,21 +374,21 @@ export default {
           if (this.selectedFunds.length) {
             _that.fetchFundsData();
           } else {
-            clearInterval(intervalId2);
+            clearInterval(_that.intervalId2);
           }
         }
       );
     },
-    toggleFavorite(id) {
+    toggleFavorite (id) {
       const _that = this;
       // 取消特别关注
       if (id == this.attentionFundcode) {
         chrome.storage.sync.set(
           {
-            attentionFundcode: undefined,
+            attentionFundcode: null,
           },
           () => {
-            _that.attentionFundcode = undefined;
+            _that.attentionFundcode = null;
             chrome.runtime.sendMessage({ type: "endInterval" });
           }
         );
@@ -408,7 +421,7 @@ export default {
   .date-tip {
     text-align: center;
     margin-top: 10px;
-    font-size: 18px;
+    font-size: 12px;
     color: pink;
   }
 }
@@ -456,17 +469,16 @@ tbody tr:hover {
 
 .btn {
   cursor: pointer;
-  background-color: #f7adad;
+  background-color: #0a77d4;
   padding: 3px 9px;
   border-radius: 20px;
-  font-size: 18px;
-  color: #1f1018;
+  font-size: 12px;
+  color: #fff;
   margin: 0 10px;
   outline: none;
   text-shadow: none;
   box-shadow: none;
   border: none;
-  font-family: cursive;
 }
 
 .input {
@@ -478,6 +490,10 @@ tbody tr:hover {
 
 .icon {
   cursor: pointer;
+  &-image {
+    widows: 20px;
+    height: 20px;
+  }
 }
 
 .btn.red {
