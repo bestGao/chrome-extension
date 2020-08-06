@@ -4,6 +4,7 @@
       当前版本：
       <span class="info-version">{{version}}</span>
     </div>
+    <div @click="handleNotifications">显示通知</div>
     <div class="operation">
       <div class="radio-wrapper">
         <label class="radio-wrapper-item">
@@ -34,31 +35,40 @@
 
 <script>
 export default {
-  data () {
+  data() {
     return {
-      version: '',
-      hasChecked: 'tiantian'
+      version: "",
+      hasChecked: "tiantian",
     };
   },
   methods: {
-    fetchSourceData () {
+    fetchSourceData() {
       chrome.storage.sync.get(["currentSources"], (res) => {
-        this.hasChecked = res.currentSources || 'tiantian'
+        this.hasChecked = res.currentSources || "tiantian";
       });
     },
-    changeSource (value) {
-      const val = value.target.value
+    changeSource(value) {
+      const val = value.target.value;
       if (val !== this.hasChecked) {
         this.hasChecked = val;
         chrome.storage.sync.set({
-          'currentSources': val,
+          currentSources: val,
         });
       }
     },
-    getVersion () {
+    handleNotifications() {
+      chrome.notifications.create(null, {
+        type: "image",
+        iconUrl: "/assets/icons/icon16.png",
+        title: "你好",
+        message: "我是通知",
+        imageUrl: "./assets/icons/icon48.png",
+      });
+    },
+    getVersion() {
       this.version = chrome.runtime.getManifest().version;
     },
-    handleReset () {
+    handleReset() {
       const result = window.confirm(
         "您的自定义设置将失效，包括设置的的大盘指数，确定要重置吗?"
       );
@@ -76,13 +86,13 @@ export default {
             "1.000688", // 科创50
           ],
         },
-        function () { }
+        function () {}
       );
-    }
+    },
   },
-  mounted () {
-    this.getVersion()
-    this.fetchSourceData()
+  mounted() {
+    this.getVersion();
+    this.fetchSourceData();
   },
 };
 </script>
