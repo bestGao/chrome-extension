@@ -1,28 +1,31 @@
-> 大家好，很高兴给老表们开启这次组内分享，算是第一个做分享的咯，所以我先来抛砖引玉，期待后续有小伙伴带来更多精彩有趣的分享。
+> 同学们好，欢迎大家参加这次组内分享。我算是第一个做分享的咯，所以我先来抛砖引玉，期待小伙伴们后续带来更多精彩有趣的分享。
 
-> 这次分享的是一个特别可爱的小工具 — chrome extension，我们可以在[chrome商店](https://chrome.google.com/webstore/category/extensions)下载一个体验下。虽然它比较不起眼，被提及的频率不高，也不算什么高科技，但是小小的身体却蕴藏着大大的能力 - 自定义您的浏览器。
+> 这次分享的是一个特别可爱的小工具 — chrome extensions，我们可以先在[chrome 商店](https://chrome.google.com/webstore/category/extensions)下载一个小程序体验下。虽然它比较不起眼，被提及的频率不高，也不算什么高科技，但是小小的身体却蕴藏着大大的能力 - 自定义您的浏览器。
 
 ## 什么是 chrome extensions
 
-> chrome 扩展是基于web技术 （如：HTML、CSS、JavaScript) 构建的可包含多个组件和功能的单一目的的小型软件；它具体能做什么：
-- 修改当前浏览的web内容，例如 整页翻译
-- 自定义浏览器启动页、主页、主题/背景色
-- 通过开放的chrome API控制浏览器的交互
+> chrome 扩展程序是运行在 chrome 浏览器上，基于 web 技术 （如：HTML、CSS、JavaScript) 构建的可包含多个组件和功能的单一目的的小型软件；使您能够根据个人需要或偏好来定制 Chrome 功能和行为；那么它具体能做些什么：
+
+- 修改当前浏览的 web 内容，例如 整页翻译
+- 自定义浏览器启动页、主页、标签页 例如[Momentum](https://momentumdash.com/) 掘金
+- 通过开放的 chrome API 自定义浏览器的交互、行为 例如 ReRes(change the response of request)
 - so on ...
 
-> 我们每天都要使用的浏览器既然有这么高的可定制性，那我们亲自动手来开发一个chrome扩展叭
+> 我们每天都要使用的浏览器既然有这么高的可定制性，那我们亲自动手来开发一个 chrome 扩展叭
 
 ## 开发
-``` javascript
+
+```javascript
 1. mkdir extension-practice && cd extension-practice
 2. touch manifest.json // 声明能被chrome识别的name、icons 等属性集合
 ```
-> 在manifest.json文件中我们需要声明整个程序生命周期内需要用到的chrome.* API权限[permissions 字段](https://developer.chrome.com/extensions/declare_permissions)；例如 注册'storage'后可以在项目中使用[chrome.storage](https://developer.chrome.com/extensions/storage)
-存取数据。设置(browser_action)[https://developer.chrome.com/extensions/browserAction#icon]的icon显示在工具栏或者页面地址栏右侧
-首先，该扩展项目的根目录必须包含一个[manifest.json](https://developer.chrome.com/extensions/manifest)用来配置该扩展程序，chrome 识别该 json 文件
+
+> 在 manifest.json 文件中我们需要声明整个程序生命周期内需要用到的 chrome.\* API 权限[permissions 字段](https://developer.chrome.com/extensions/declare_permissions)；例如 注册'storage'后可以在项目中使用[chrome.storage](https://developer.chrome.com/extensions/storage)
+> 存取数据。设置(browser_action)[https://developer.chrome.com/extensions/browserAction#icon]的 icon 显示在工具栏或者页面地址栏右侧
+> 首先，该扩展项目的根目录必须包含一个[manifest.json](https://developer.chrome.com/extensions/manifest)用来配置该扩展程序，chrome 识别该 json 文件
 
 包括实时估值情况，可以增减自选基金。
-关闭弹窗，时popup.html就被销毁
+关闭弹窗，时 popup.html 就被销毁
 单击 Chrome 菜单，将鼠标悬停在更多工具上，然后选择 “任务管理器”，以打开任务管理器
 高效的后台脚本包含对其扩展很重要的已注册事件。 它们处于休眠状态，直到触发了侦听器，再采取相应的操作，然后返回休眠状态。保持不需要的脚本运行，对系统资源的浪费。
 
@@ -36,15 +39,15 @@
 [Vue2.x](https://cn.vuejs.org/v2/guide/instance.html) + [Webpack4.x](https://v4.webpack.js.org/concepts/plugins/)
 
 当然完全可以直接用 HTML CSS JavaScript
-
+右键 <img src="./src/assets/images/page_action.png" width="400" alt="page_action" />
 使用 web worker 实现 ajax 轮询
-build 和build:dev最大的区别就是build:dev 把ajax轮询放到了node.js服务器，让服务器判断数据是否变化通过websocket向客户端推送大盘指数数据
+build 和 build:dev 最大的区别就是 build:dev 把 ajax 轮询放到了 node.js 服务器，让服务器判断数据是否变化通过 websocket 向客户端推送大盘指数数据
 websocket
 
 同源策略
-从上面的测试可以看出，WebSocket协议本身不要求同源策略（Same-origin Policy），也就是某个地址为http://a.com的网页可以通过WebSocket连接到ws://b.com。但是，浏览器会发送Origin的HTTP头给服务器，服务器可以根据Origin拒绝这个WebSocket请求。所以，是否要求同源要看服务器端如何检查
+从上面的测试可以看出，WebSocket 协议本身不要求同源策略（Same-origin Policy），也就是某个地址为http://a.com的网页可以通过WebSocket连接到ws://b.com。但是，浏览器会发送Origin的HTTP头给服务器，服务器可以根据Origin拒绝这个WebSocket请求。所以，是否要求同源要看服务器端如何检查
 
-部署在docker上
+部署在 docker 上
 
 扩展常常用一个单独的长时间运行的脚本来管理一些任务或者状态
 
@@ -59,9 +62,7 @@ websocket
 
 Chrome 浏览器扩展通过 chrome.storage.\* API，可以存取数据或监听数据的变化
 chrome.storage.sync 方式实现了自动数据同步，相同的 chrome 用户无论使用什么物理设备，只要以相同的账户登录即可访问存储的数据。设备离线时数据存储在本地，一旦设备上线则同步数据。除非手动卸载
-如果用户禁止了数据同步或者没有登录chrome账户，则采用 chrome.storage.local 方式
-
-
+如果用户禁止了数据同步或者没有登录 chrome 账户，则采用 chrome.storage.local 方式
 
 ### 调试
 
@@ -76,9 +77,15 @@ yarn run watch 监听文件修改并编译
 
 #### 数据来源
 
+支付宝的基金数据抓取不到，
+
 - 天天基金网/大盘指数：[获取指数接口示例](https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&secids=1.000001,0.399001&invt=2&fields=f2,f3,f4,f6,f12,f14,f104,f105,f106&ut=267f9ad526dbe6b0262ab19316f5a25b&cb=jQuery183027144151760481683_1595495878685&_=1595495878944)
+
+接口来源于[指数详情页](http://quote.eastmoney.com/center/hszs.html)
 
 - 天天基金网/基金详情：[基金数据接口示例](http://fundgz.1234567.com.cn/js/519674.js?rt=1595495344238)
 
-还可以做什么
-怎么打通支付宝的基金页面实现在扩展程序的popup.html买卖基金？
+#### 扩展
+
+1. 还可以做什么
+   怎么打通支付宝的基金页面实现在扩展程序的 popup.html 买卖基金？

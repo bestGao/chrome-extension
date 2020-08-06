@@ -1,6 +1,16 @@
 <template>
   <div id="app" :class="['container', {'more-width' :isEdit}]">
     <!-- 大盘指数 -->
+    <div
+      v-if="usedWS"
+      class="index-tip"
+      :style="{'text-align': 'center', 'color': '#c0c0c0', 'font-size': '12px', 'margin': '10px 0'}"
+    >
+      实时行情信息{{ isDuringDate ? '' :'(mock数据)' }}来自服务器 {{ WSHOST }} 的推送
+      <span
+        v-if="curTime"
+      >&nbsp;&nbsp;更新时间 {{curTime}}</span>
+    </div>
     <div class="tab-row" :key="index" v-for="(rowItem, index) of marketIndexes">
       <div v-for="el of rowItem" class="tab-col" :class="el.f4 >= 0 ? 'up' : 'down'" :key="el.f12">
         <div class="close-icon-wrapper" @click="closeItem(el)">
@@ -104,11 +114,14 @@
 </template>
 
 <script>
-import { arrayChunk } from "../util";
+import { arrayChunk, WSHOST } from "../util";
 
 export default {
   data () {
     return {
+      usedWS: false,
+      WSHOST,
+      curTime: '',
       searchIds: [], // 大盘指数id数组
       isEdit: false, // 是否编辑
       fundcode: null, // 将要添加的基金代码
@@ -123,33 +136,63 @@ export default {
     };
   },
   mounted () {
+    const _that = this
     chrome.storage.sync.get(
-      ["attentionFundcode", "searchIds", "storedFunds"],
+      ["attentionFundcode", "searchIds", "storedFunds", "currentSources"],
       (res) => {
         this.attentionFundcode = res.attentionFundcode;
         /* res.searchIds: undefined 默认值 res.searchIds: [] 用户手动删除 */
         this.searchIds = res.searchIds || [
-          "1.000001", // 上证
+          "1.000001", // 上证指数
+          "0.399001", // 深圳成指
+          "0.399006", // 创业板指
           "1.000300", // 沪深300
-          "0.399006", // 创业板
-          "0.399005", // 中小板
-          "100.HSI", // 恒生
-          "1.000688", // 科创50
+          "1.000016", // 上证50
+          "1.000905", // 中证500,
         ];
+        const isWS = res.currentSources === 'localserver'
+        // 使用本地server mock大盘指数数据
+        if (isWS) {
+          _that.useWS()
+        }
         // console.log("返回", res.searchIds);
         if (!(JSON.stringify(res.searchIds) === "[]")) {
-          this.getmarketIndexes();
+          // 用户选择的大盘指数不为空
+          _that.getmarketIndexes();
         }
         // console.log("自选的基金", res.storedFunds);
-        this.selectedFunds = res.storedFunds || [];
-        this.fetchFundsData();
-        this.startUpdateData();
+        _that.selectedFunds = res.storedFunds || [];
+        _that.fetchFundsData();
+        _that.startUpdateData(isWS);
       }
     );
     document.body.bgColor = "#fafff8";
   },
   methods: {
-    startUpdateData () {
+    useWS () {
+      const _that = this
+      /* ws start */
+      const ws = new WebSocket(`ws://${WSHOST}`);
+      ws.addEventListener("open", function (event) {
+        ws.send("jayGao");
+      });
+      ws.addEventListener("message", function (event) {
+        _that.usedWS = true;
+        console.log("本地服务器传来的数据", event.data);
+        const serverData = JSON.parse(event.data);
+        const { fundArray, curTime } = serverData
+        _that.originalMarketIndexes = fundArray;
+        _that.marketIndexes = arrayChunk(fundArray, 3);
+        _that.curTime = curTime
+      });
+      ws.onerror = function () {
+        alert("websocket服务器连接失败");
+        _that.usedWS = false;
+        return false;
+      };
+      /* ws end */
+    },
+    startUpdateData (isWs = false) {
       const _that = this;
       // 与后台脚本background.js通信
       chrome.runtime.sendMessage({ type: "DuringDate" }, (res) => {
@@ -158,7 +201,7 @@ export default {
         if (res.isEffective) {
           // 手动删除完是[]
           // alert(_that.searchIds && _that.searchIds.length)
-          if (_that.searchIds && _that.searchIds.length >= 1) {
+          if (_that.searchIds && _that.searchIds.length >= 1 && !isWs) {
             _that.intervalId1 = setInterval(() => {
               _that.getmarketIndexes();
             }, 5 * 1000);
@@ -198,8 +241,8 @@ export default {
       chrome.storage.sync.set({ searchIds: sd1 });
     },
     option () {
-      window.open("/options/options.html");
-      // chrome.tabs.create({ url: "/options/options.html" });
+      // window.open("/options/options.html");
+      chrome.tabs.create({ url: "/options/options.html" });
     },
     getmarketIndexes () {
       // f1-f18: 指数参数 1.000001 是上证指数代号
@@ -219,7 +262,7 @@ export default {
       let resultArray = [];
       for (const fund of this.selectedFunds) {
         let url =
-          "http://fundgz.1234567.com.cn/js/" +
+          "https://fundgz.1234567.com.cn/js/" +
           fund.fundcode +
           ".js?rt=" +
           new Date().getTime();
@@ -300,7 +343,7 @@ export default {
       }
 
       // 获取基金详情
-      let url = `http://fundgz.1234567.com.cn/js/${
+      let url = `https://fundgz.1234567.com.cn/js/${
         this.fundcode
         }.js?rt=${new Date().getTime()}`;
       this.$axios

@@ -5,6 +5,28 @@
       <span class="info-version">{{version}}</span>
     </div>
     <div class="operation">
+      <div class="radio-wrapper">
+        <label class="radio-wrapper-item">
+          天天基金网:
+          <input
+            type="radio"
+            name="dataSources"
+            @click="changeSource"
+            value="tiantian"
+            :checked="hasChecked === 'tiantian'"
+          />
+        </label>
+        <label class="radio-wrapper-item">
+          本地服务器:
+          <input
+            type="radio"
+            name="dataSources"
+            @click="changeSource"
+            value="localserver"
+            :checked="hasChecked === 'localserver'"
+          />
+        </label>
+      </div>
       <div class="btn" @click="handleReset" title="重置后您的自定义选项都将失效">重置</div>
     </div>
   </div>
@@ -14,10 +36,25 @@
 export default {
   data () {
     return {
-      version: ''
+      version: '',
+      hasChecked: 'tiantian'
     };
   },
   methods: {
+    fetchSourceData () {
+      chrome.storage.sync.get(["currentSources"], (res) => {
+        this.hasChecked = res.currentSources || 'tiantian'
+      });
+    },
+    changeSource (value) {
+      const val = value.target.value
+      if (val !== this.hasChecked) {
+        this.hasChecked = val;
+        chrome.storage.sync.set({
+          'currentSources': val,
+        });
+      }
+    },
     getVersion () {
       this.version = chrome.runtime.getManifest().version;
     },
@@ -45,6 +82,7 @@ export default {
   },
   mounted () {
     this.getVersion()
+    this.fetchSourceData()
   },
 };
 </script>
@@ -53,14 +91,20 @@ export default {
 .container {
   background-color: #fff8f1;
   padding: 20px;
+  font-size: 16px;
   .info {
-    padding: 10px;
     &-version {
-      font-size: 16px;
       color: pink;
     }
   }
   .operation {
+    .radio-wrapper {
+      margin: 10px 0;
+      &-item {
+        margin-right: 20px;
+        vertical-align: -webkit-baseline-middle;
+      }
+    }
     .btn {
       padding: 10px 28px;
       font-size: 20px;
