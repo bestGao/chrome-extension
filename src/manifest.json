@@ -30,10 +30,20 @@
     "chrome_style": true,
     "open_in_tab": true
   },
+  "omnibox": { "keyword" : "funds" },
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "background": {
     "persistent": false,
-    "scripts": ["background.js"]
+    "scripts": [
+      "background.js"
+    ]
   },
-  "permissions": ["contextMenus", "tabs", "storage", "http://fundgz.1234567.com.cn/js/*", "https://fundgz.1234567.com.cn/js/*", "http://push2.eastmoney.com/api/*", "https://push2.eastmoney.com/api/*"]
+  "permissions": [
+    "contextMenus",
+    "notifications",
+    "tabs",
+    "storage",
+    "http://*/*",
+    "https://*/*"
+  ]
 }
