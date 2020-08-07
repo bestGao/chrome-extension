@@ -21,9 +21,9 @@
           :class="el.f4 >= 0 ? 'up' : 'down'"
           title="最新价"
           :style="{'font-size': '20px'}"
-        >{{ el.f2 }}</p>
-        <p :class="el.f4 >= 0 ? 'up' : 'down'">涨跌额：{{ el.f4 }}</p>
-        <p :class="el.f4 >= 0 ? 'up' : 'down'">涨跌幅：{{ el.f3 }}%</p>
+        >{{ (el.f2).toFixed(2) }}</p>
+        <p :class="el.f4 >= 0 ? 'up' : 'down'">涨跌额：{{ (el.f4).toFixed(2) }}</p>
+        <p :class="el.f4 >= 0 ? 'up' : 'down'">涨跌幅：{{ (el.f3).toFixed(2) }}%</p>
       </div>
     </div>
     <div class="date-tip">
@@ -117,11 +117,11 @@
 import { arrayChunk, WSHOST } from "../util";
 
 export default {
-  data () {
+  data() {
     return {
       usedWS: false,
       WSHOST,
-      curTime: '',
+      curTime: "",
       searchIds: [], // 大盘指数id数组
       isEdit: false, // 是否编辑
       fundcode: null, // 将要添加的基金代码
@@ -135,8 +135,8 @@ export default {
       originalMarketIndexes: [], // 大盘指数数组
     };
   },
-  mounted () {
-    const _that = this
+  mounted() {
+    const _that = this;
     chrome.storage.sync.get(
       ["attentionFundcode", "searchIds", "storedFunds", "currentSources"],
       (res) => {
@@ -150,10 +150,10 @@ export default {
           "1.000016", // 上证50
           "1.000905", // 中证500,
         ];
-        const isWS = res.currentSources === 'localserver'
+        const isWS = res.currentSources === "localserver";
         // 使用本地server mock大盘指数数据
         if (isWS) {
-          _that.useWS()
+          _that.useWS();
         }
         // console.log("返回", res.searchIds);
         if (!(JSON.stringify(res.searchIds) === "[]")) {
@@ -169,8 +169,8 @@ export default {
     document.body.bgColor = "#fafff8";
   },
   methods: {
-    useWS () {
-      const _that = this
+    useWS() {
+      const _that = this;
       /* ws start */
       const ws = new WebSocket(`ws://${WSHOST}`);
       ws.addEventListener("open", function (event) {
@@ -180,10 +180,10 @@ export default {
         _that.usedWS = true;
         console.log("本地服务器传来的数据", event.data);
         const serverData = JSON.parse(event.data);
-        const { fundArray, curTime } = serverData
+        const { fundArray, curTime } = serverData;
         _that.originalMarketIndexes = fundArray;
         _that.marketIndexes = arrayChunk(fundArray, 3);
-        _that.curTime = curTime
+        _that.curTime = curTime;
       });
       ws.onerror = function () {
         alert("websocket服务器连接失败");
@@ -192,7 +192,7 @@ export default {
       };
       /* ws end */
     },
-    startUpdateData (isWs = false) {
+    startUpdateData(isWs = false) {
       const _that = this;
       // 与后台脚本background.js通信
       chrome.runtime.sendMessage({ type: "DuringDate" }, (res) => {
@@ -217,7 +217,7 @@ export default {
         }
       });
     },
-    closeItem (item) {
+    closeItem(item) {
       const result = window.confirm("确定不再展示该指数?");
       if (!result) {
         return false;
@@ -240,11 +240,11 @@ export default {
       this.searchIds = sd1;
       chrome.storage.sync.set({ searchIds: sd1 });
     },
-    option () {
+    option() {
       // window.open("/options/options.html");
       chrome.tabs.create({ url: "/options/options.html" });
     },
-    getmarketIndexes () {
+    getmarketIndexes() {
       // f1-f18: 指数参数 1.000001 是上证指数代号
       let url = `https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&fields=f2,f3,f4,f12,f14&secids=${this.searchIds.join(
         ","
@@ -255,7 +255,7 @@ export default {
       });
     },
     /* 请求自选的基金数据 */
-    fetchFundsData () {
+    fetchFundsData() {
       /* fundcode 基金代码 name 基金名称 jzrq 净值日期 dwjz 当日净值 gsz 估算净值 gszzl 估算涨跌百分比 gztime 估值时间 */
       const _that = this;
       let axiosArray = [];
@@ -301,14 +301,14 @@ export default {
           console.log("数据请求出现错误！");
         });
     },
-    getAllGains () {
+    getAllGains() {
       let allGains = 0;
       this.selectedFunds.forEach((val) => {
         allGains += parseFloat(this.calculate(val));
       });
       this.allGains = allGains.toFixed(2);
     },
-    changeNum (item) {
+    changeNum(item) {
       for (let fund of this.selectedFunds) {
         if (fund.fundcode == item.fundcode) {
           fund.num = item.num;
@@ -319,15 +319,15 @@ export default {
       });
       this.getAllGains();
     },
-    calculateMoney (val) {
+    calculateMoney(val) {
       let sum = val ? (val.dwjz * val.num).toFixed(2) : 0;
       return sum;
     },
-    calculate (val) {
+    calculate(val) {
       let sum = val ? ((val.gsz - val.dwjz) * val.num).toFixed(2) : 0;
       return sum;
     },
-    handleAdd () {
+    handleAdd() {
       const _that = this;
       // 判断是否已存在
       let hasCode;
@@ -345,7 +345,7 @@ export default {
       // 获取基金详情
       let url = `https://fundgz.1234567.com.cn/js/${
         this.fundcode
-        }.js?rt=${new Date().getTime()}`;
+      }.js?rt=${new Date().getTime()}`;
       this.$axios
         .get(url)
         .then((res) => {
@@ -378,7 +378,7 @@ export default {
           alert("无法获取该基金信息！");
         });
     },
-    sortUp (index) {
+    sortUp(index) {
       let val = this.selectedFunds[index - 1];
       // vue实例创建后给selectedFunds对象添加新的属性
       this.$set(this.selectedFunds, index - 1, this.selectedFunds[index]);
@@ -392,7 +392,7 @@ export default {
       });
     },
     // 删除单个自选的基金
-    deleteFund (id) {
+    deleteFund(id) {
       if (id == this.attentionFundcode) {
         chrome.storage.sync.set(
           {
@@ -422,7 +422,7 @@ export default {
         }
       );
     },
-    toggleFavorite (id) {
+    toggleFavorite(id) {
       const _that = this;
       // 取消特别关注
       if (id == this.attentionFundcode) {
