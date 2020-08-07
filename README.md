@@ -1,4 +1,7 @@
 <div style="background-color: #f5f5f5; color: #333">
+<div style="text-align:center; font-size: 20px;margin: 10px 0; color: #000;font-weight:bold">
+chrome extension 开发实战
+</div>
 
 > 同学们好，欢迎大家参加这次组内分享。因为这算是第一个分享咯，所以我先来抛砖引玉，期待小伙伴们后续带来更多精彩有趣的分享。
 
@@ -16,6 +19,8 @@
 - 自定义浏览器启动页、主页、标签页、窗口控制 例如[Momentum](https://momentumdash.com/) 掘金
 - 通过开放的 chrome API 自定义浏览器的交互、行为、通信、网络请求控制 例如[adblock](https://getadblock.com/)
 - 书签、下载、资源嗅探 例如 [猫抓](https://chrome.google.com/webstore/detail/%E7%8C%AB%E6%8A%93/jfedfbgedapdagkghmgibemcoggfppbb?hl=zh-CN)
+- 扩展浏览器的开发者工具 例如[Vue.js devtools](https://chrome.google.com/webstore/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)、[React Developer Tools
+](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi)
 - so on ...
 
 > 很多主流的浏览器都有自己的扩展程序解决方案，包括使用 webkit 内核的国产浏览器，比如搜狗浏览器、QQ 浏览器、[360 极速浏览器小工具](https://ext.chrome.360.cn/webstore/category/%E5%B0%8F%E5%B7%A5%E5%85%B7/%E7%BC%96%E8%BE%91%E6%8E%A8%E8%8D%90)；[firefox](https://addons.mozilla.org/en-US/firefox/extensions/)等；甚至[safari 扩展](https://developer.apple.com/documentation/safariservices/safari_web_extensions)
@@ -24,12 +29,7 @@
 
 <img src="./src/assets/images/teachme.png" width="auto" height="200" />
 
-## 创造
-
-从右上角菜单->更多工具->扩展程序，或者直接在地址栏输入 chrome://extensions 访问插件管理页；勾选开发者模式即可以文件夹的形式直接加载插件，否则只能安装.crx 格式的文件。Chrome 要求插件必须从它的 Chrome 应用商店安装，其它任何网站下载的都无法直接安装，所以，其实我们可以把 crx 文件解压，然后通过开发者模式直接加载。
-
-开发中，代码有任何改动都必须重新加载插件，在插件管理页按下 Ctrl(command)+R 或者刷新该程序。
-
+## 开发
 ```javascript
 1. mkdir extension-practice && cd extension-practice
 2. touch manifest.json // 声明能被chrome识别的manifest_version、name、version 等属性集合
@@ -38,9 +38,7 @@
 #### 配置 manifest.json
 
 一个扩展程序的根目录必须包含一个[manifest.json](https://developer.chrome.com/extensions/manifest)；其中manifest_version、name、version这3个属性是必不可少的。
-下图是一个完整的manifest.json配置示例；完整的属性请参考[官方文档](https://developer.chrome.com/extensions/manifest)
-<img src="./src/assets/images/fullparams.png" />
-
+[这里](https://crxdoc-zh.appspot.com/extensions/manifest)是一个完整的manifest.json配置示例；更详细的属性请参考[官方文档](https://developer.chrome.com/extensions/manifest)
 
 在 manifest.json 文件中我们需要声明整个程序生命周期内需要用到的 chrome.\* API 权限；设置[permissions属性](https://developer.chrome.com/extensions/declare_permissions)；例如 注册'storage'后可以在项目中使用[chrome.storage](https://developer.chrome.com/extensions/storage)
   
@@ -87,7 +85,9 @@ background的权限非常高，几乎可以调用所有的Chrome扩展API（除�
 [Vue2.x](https://cn.vuejs.org/v2/guide/instance.html) + [Webpack4.x](https://v4.webpack.js.org/concepts/plugins/)
 
 当然完全可以直接用 HTML CSS JavaScript
-右键 <img src="./src/assets/images/page_action.png" width="400" alt="page_action" />
+右键 
+<img src="./src/assets/images/page_action.png" width="400" alt="page_action" />
+
 使用 web worker 实现 ajax 轮询
 build 和 build:dev 最大的区别就是 build:dev 把 ajax 轮询放到了 node.js 服务器，让服务器判断数据是否变化通过 websocket 向客户端推送大盘指数数据
 websocket
@@ -117,52 +117,57 @@ chrome.storage.sync 方式实现了自动数据同步，相同的 chrome 用户�
 所谓options页，就是插件的设置页面，有2个入口，一个是右键图标有一个“选项”菜单，还有一个在插件管理页面
 
 7.2.3. content-script主动发消息给后台
+
+``` javascript
 content-script.js：
 
 chrome.runtime.sendMessage({greeting: '你好，我是content-script呀，我主动发消息给后台！'}, function(response) {
-	console.log('收到来自后台的回复：' + response);
+console.log('收到来自后台的回复：' + response);
 });
+```
 background.js 或者 popup.js：
 
+``` javascript
 // 监听来自content-script的消息
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
 {
-	console.log('收到来自content-script的消息：');
-	console.log(request, sender, sendResponse);
-	sendResponse('我是后台，我已收到你的消息：' + JSON.stringify(request));
+console.log('收到来自content-script的消息：');
+console.log(request, sender, sendResponse);
+sendResponse('我是后台，我已收到你的消息：' + JSON.stringify(request));
 });
+```
+
 注意事项：
 
 content_scripts向popup主动发消息的前提是popup必须打开！否则需要利用background作中转；
 如果background和popup同时监听，那么它们都可以同时收到消息，但是只有一个可以sendResponse，一个先发送了，那么另外一个再发送就无效；
 
+#### 调试
 
-### 调试
+1. yarn/npm run watch 监听文件修改并编译。
+2. 从右上角菜单->更多工具->扩展程序，或者直接在地址栏输入 chrome://extensions 访问插件管理页；勾选开发者模式即可以文件夹的形式直接加载插件，否则只能安装.crx 格式的文件。Chrome 要求程序必须从它的 Chrome 应用商店安装，其它任何网站下载的都无法直接安装，所以，其实我们可以把 crx 文件解压成文件夹，然后通过开发者模式直接加载。
+3. 开发中，代码有任何改动都必须重新加载程序，重新打开即可。
+4. 点击扩展程序在弹出来的页面右键=>检查 或在 扩展程序 icon 上右键=>审查弹出内容（popup.html）
 
-yarn run watch 监听文件修改并编译
-
-1. 打开 chrome://extensions 开启开发者模式 加载已解压的扩展程序
-2. 点击扩展程序在弹出页面右键/检查 或在 扩展程序 icon 上右键 审查弹出内容
-
-#### 参考资料
+## 参考资料
 
 - [官方文档](https://developer.chrome.com/extensions)
 
-#### 数据来源
+## 数据来源
 
-支付宝的基金数据抓取不到，
+由于支付宝的基金数据通过常规的charles https抓取不到，但是搜索到可以使用天天基金网的接口：
 
-- 天天基金网/大盘指数：[获取指数接口示例](https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&secids=1.000001,0.399001&invt=2&fields=f2,f3,f4,f6,f12,f14,f104,f105,f106&ut=267f9ad526dbe6b0262ab19316f5a25b&cb=jQuery183027144151760481683_1595495878685&_=1595495878944)
-
+1. 天天基金网/大盘指数：[获取指数接口示例](https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&secids=1.000001,0.399001&invt=2&fields=f2,f3,f4,f6,f12,f14,f104,f105,f106&ut=267f9ad526dbe6b0262ab19316f5a25b&cb=jQuery183027144151760481683_1595495878685&_=1595495878944)
 接口来源于[指数详情页](http://quote.eastmoney.com/center/hszs.html)
+2. 天天基金网/基金详情：[基金数据接口示例](http://fundgz.1234567.com.cn/js/519674.js?rt=1595495344238)
 
-- 天天基金网/基金详情：[基金数据接口示例](http://fundgz.1234567.com.cn/js/519674.js?rt=1595495344238)
+## 扩展阅读
 
-#### 扩展
+1. 我们当前的程序只能查看数据好像不尽如人意；还可以做什么呢？
+   - 怎么打通支付宝的基金页面实现在扩展程序的 popup.html 买卖基金？
+2. 这里推荐一个vscode插件[韭菜基金](https://marketplace.visualstudio.com/items?itemName=giscafer.leek-fund)；前端大部分时间都在使用vscode和chrome，可以高度自定义的工具可以带来很多乐趣和效率提升，可以多研究下。
 
-1. 还可以做什么
-   怎么打通支付宝的基金页面实现在扩展程序的 popup.html 买卖基金？
-   </div>
+## 总结
 
-#### 总结
-chrome给开发者提供了大量的API 大家可以尽情的探索，打造属于自己的优雅的浏览器
+chrome为开发者提供了大量的API 我们可以尽情的探索，打造属于自己的优雅的浏览器。
+</div>

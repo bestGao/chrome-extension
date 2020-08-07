@@ -186,7 +186,14 @@ export default {
         _that.curTime = curTime;
       });
       ws.onerror = function () {
-        alert("websocket服务器连接失败");
+        chrome.notifications.create(null, {
+          type: "image",
+          iconUrl: "../assets/icons/icon16.png",
+          title: "错误",
+          message: "websocket服务器连接失败",
+          imageUrl: "../assets/icons/icon48.png",
+        });
+        // alert("websocket服务器连接失败");
         _that.usedWS = false;
         return false;
       };
@@ -338,7 +345,14 @@ export default {
       }
 
       if (hasCode) {
-        alert("该基金已存在！");
+        chrome.notifications.create(null, {
+          type: "image",
+          iconUrl: "../assets/icons/icon32.png",
+          title: "警告",
+          message: "该基金已存在！",
+          imageUrl: "../assets/icons/icon128.png",
+        });
+        // alert("");
         return false;
       }
 
@@ -371,11 +385,25 @@ export default {
               }
             );
           } else {
-            alert("请输入正确的基金代码");
+            chrome.notifications.create(null, {
+              type: "image",
+              iconUrl: "../assets/icons/icon32.png",
+              title: "警告",
+              message: "请输入正确的基金代码",
+              imageUrl: "../assets/icons/icon128.png",
+            });
+            // alert("请输入正确的基金代码");
           }
         })
         .catch((error) => {
-          alert("无法获取该基金信息！");
+          chrome.notifications.create(null, {
+            type: "image",
+            iconUrl: "../assets/icons/icon32.png",
+            title: "警告",
+            message: "无法获取该基金信息！",
+            imageUrl: "../assets/icons/icon128.png",
+          });
+          // alert("无法获取该基金信息！");
         });
     },
     sortUp(index) {

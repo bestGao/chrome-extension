@@ -4,7 +4,6 @@
       当前版本：
       <span class="info-version">{{version}}</span>
     </div>
-    <div @click="handleNotifications">显示通知</div>
     <div class="operation">
       <div class="radio-wrapper">
         <label class="radio-wrapper-item">
@@ -55,15 +54,6 @@ export default {
           currentSources: val,
         });
       }
-    },
-    handleNotifications() {
-      chrome.notifications.create(null, {
-        type: "image",
-        iconUrl: "/assets/icons/icon16.png",
-        title: "你好",
-        message: "我是通知",
-        imageUrl: "./assets/icons/icon48.png",
-      });
     },
     getVersion() {
       this.version = chrome.runtime.getManifest().version;

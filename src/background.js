@@ -39,7 +39,7 @@ const options = {
 
 chrome.runtime.onInstalled.addListener(function () {
   chrome.contextMenus.create(options, () => {
-    // console.log(`Created contextMenus Success, id:${options.id}`);
+    console.log(`Created contextMenus Success, id:${options.id}`);
   });
 });
 chrome.contextMenus.onClicked.addListener(function (info, tab) {
