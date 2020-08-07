@@ -175,6 +175,13 @@ export default {
       const ws = new WebSocket(`ws://${WSHOST}`);
       ws.addEventListener("open", function (event) {
         ws.send("jayGao");
+        chrome.notifications.create(null, {
+          type: "image",
+          iconUrl: "../assets/icons/icon16.png",
+          title: "恭喜！",
+          message: "websocket服务器连接成功",
+          imageUrl: "../assets/icons/icon48.png",
+        });
       });
       ws.addEventListener("message", function (event) {
         _that.usedWS = true;
@@ -253,7 +260,7 @@ export default {
     },
     getmarketIndexes() {
       // f1-f18: 指数参数 1.000001 是上证指数代号
-      let url = `https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&fields=f2,f3,f4,f12,f14&secids=${this.searchIds.join(
+      let url = `http://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&fields=f2,f3,f4,f12,f14&secids=${this.searchIds.join(
         ","
       )}&_=${new Date().getTime()}`;
       this.$axios.get(url).then((res) => {
@@ -269,7 +276,7 @@ export default {
       let resultArray = [];
       for (const fund of this.selectedFunds) {
         let url =
-          "https://fundgz.1234567.com.cn/js/" +
+          "http://fundgz.1234567.com.cn/js/" +
           fund.fundcode +
           ".js?rt=" +
           new Date().getTime();
@@ -357,7 +364,7 @@ export default {
       }
 
       // 获取基金详情
-      let url = `https://fundgz.1234567.com.cn/js/${
+      let url = `http://fundgz.1234567.com.cn/js/${
         this.fundcode
       }.js?rt=${new Date().getTime()}`;
       this.$axios
