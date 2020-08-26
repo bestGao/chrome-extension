@@ -123,7 +123,7 @@ background的权限非常高，几乎可以调用所有的Chrome扩展API（除�
 2. 从右上角菜单->更多工具->扩展程序，或者直接在地址栏输入 chrome://extensions 访问插件管理页；勾选开发者模式即可以文件夹的形式直接加载插件，否则只能安装.crx 格式的文件。Chrome 要求程序必须从它的 Chrome 应用商店安装，其它任何网站下载的都无法直接安装，所以，其实我们可以把 crx 文件解压成文件夹，然后通过开发者模式直接加载。
 3. 开发中，代码有任何改动都必须重新加载程序，重新打开即可。
 4. 点击扩展程序在弹出来的页面右键=>检查 或在 扩展程序 icon 上右键=>审查弹出内容（popup.html）
-5. 我们还用到了[notifications](https://developer.chrome.com/apps/notifications)、[chrome.browserAction.setBadgeText](https://developer.chrome.com/extensions/browserAction#method-setBadgeText)、chrome.(contextMenus)[https://developer.chrome.com/apps/contextMenus]等等APi
+5. 我们还用到了[notifications](https://developer.chrome.com/apps/notifications)、[chrome.browserAction.setBadgeText](https://developer.chrome.com/extensions/browserAction#method-setBadgeText)、[chrome.contextMenus](https://developer.chrome.com/apps/contextMenus)等等APi
 ## 参考资料
 
 - [官方文档](https://developer.chrome.com/extensions)
